@@ -64,9 +64,9 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 \begin{abstract}
     We present a structured learning approach to semantic annotation of RGB-D
     images. 
-    Our method learns to reason about spacial relations of objects and
+    Our method learns to reason about spatial relations of objects and
     fuses low-level class predictions to a consistent interpretation of a
-    scene. Our model incooporates color, depth and 3D scene features, on which
+    scene. Our model incorporates color, depth and 3D scene features, on which
     an energy function is learned to directly optimize object class prediction using
     the loss-based maximum-margin principle of structural support vector machines.
     %With the proliferation of cheap % TODO urghs formulation
@@ -89,7 +89,7 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 For robots to perform varied tasks in unstructured environments, understanding their
-sourroundings is essential. We formulate the problem of semantic annotation of maps
+surroundings is essential. We formulate the problem of semantic annotation of maps
 as a dense labeling of RGB-D images into semantic classes. Dense labeling of objects
 and structure classes allows for a detailed reasoning about the scene.
 
@@ -101,8 +101,8 @@ random forest to a consistent interpretation of the scene.
 
 We thereby extend the success of learned conditional random field models for
 semantic segmentation in RGB images to the domain of 3D scenes.
-Our emphasis lies on expoiting the additional depth and 3D information in all
-procsessing steps, while relying on \emph{learning} to create a model that 
+Our emphasis lies on exploiting the additional depth and 3D information in all
+processing steps, while relying on \emph{learning} to create a model that 
 is adjusted to the properties of the sensor input and environment.
 
 Our approach starts with a random forest, providing a noisy local estimate
@@ -117,8 +117,8 @@ of superpixels.  We use this graph not only to capture spacial relations in the
 We access the accuracy of our model on the challenging NYU Segmentation V2
 dataset \citep{SilbermanECCV12}, where our model outperforms previous
 approaches.  Our analysis shows that while our random forest model
-already has competative performance, the superpixel-based grouping and in
-pariculare the loss-based learning are integral ingredients of the success of our method.
+already has competitive performance, the superpixel-based grouping and in
+particular the loss-based learning are integral ingredients of the success of our method.
 
 \section{RELATED WORK}
 The task of dense semantic labeling in natural images has been widely studied
@@ -130,23 +130,23 @@ random fields, learning object interactions from the
 data to directly maximize a loss function~\citep{lucchi2013learning, krahenbuhl2012efficient},
 which is the approach we are following.
 
-Work using RGB-D data only recently emmerged with
+Work using RGB-D data only recently emerged with
 the availability of the NYU Depth Dataset V1~\citep{silberman2011indoor}.
-\citet{silberman2011indoor} captured a wide variety of indoor scence using a structured light sensor,
+\citet{silberman2011indoor} captured a wide variety of indoor scene using a structured light sensor,
 and provided dense semantic object class annotation. Their work also introduced a baseline method
 for semantic segmentation of RGB-D image, which used an approach based on superpixels, interest
-point descriptors and a conditional random field. While pairwise potentials for the CRF were carfully
+point descriptors and a conditional random field. While pairwise potentials for the CRF were carefully
 designed for the dataset, potentials were either directly set by hand or estimated using empirical
 frequencies. This is in contrast to our work, which applies structured prediction techniques
 to learn potentials automatically to optimize predictive performance.
 \citet{ren2012rgb} focus on the design of features for semantic labeling of RGB-D data, and use
 a hierarchical segmentation to provide context. While they also define a conditional random field on superpixels,
-their model is again not learned, but a weighted potts model, using only a
+their model is again not learned, but a weighted Potts model, using only a
 probability of boundary map, and not taking spacial layout into account at all.
 
-\citet{SilbermanECCV12} extendet the NYU Depth Dataset V1 to the NYU Depth Dataset V2 that we are also
+\citet{SilbermanECCV12} extended the NYU Depth Dataset V1 to the NYU Depth Dataset V2 that we are also
 using in this work.  Their focus is on inferring support relations in indoor
-scence, such as objects resting on tables or shelfs, which in turn rest on the floor.
+scenes, such as objects resting on tables or shelfs, which in turn rest on the floor.
 Their approach is based on robust estimation of 3D plane hypotheses, which are then jointly
 optimized with support relations and structure classes.
 \citet{SilbermanECCV12} use a complex pipeline, employing significant domain knowledge.
@@ -161,17 +161,17 @@ Similar to our approach, \citet{couprie-iclr-13} combine the output of a
 pixel-based, low-level learning algorithm with an independent unsupervised
 segmentation step. In contrast to their work, we improve our results by not
 only averaging predictions within superpixels, but also explicitly learning
-interactions between neighboring superpixels, favouring a consistent
+interactions between neighboring superpixels, favoring a consistent
 interpretation of the whole image.
 
 \citet{stueckler2013} proposed a real-time system for online learning and prediction of semantic classes.
 Their main contribution is the online integration of low-level predictions over multiple frames
 by estimating camera motion and building a 3D model of the scene.
 We use the implementation of random forest provided by \citet{stueckler2013}, but instead of
-integrating predictions over time, we focus on exploiting the structur within a single frame.
+integrating predictions over time, we focus on exploiting the structure within a single frame.
 
 \section{LEARNING DEPTH-SENSITVE CONDITIONAL RANDOM FIELDS}
-We take a conditional random field approach, whose nodes repesent a labeling of
+We take a conditional random field approach, whose nodes represent a labeling of
 superpixels.  We use an energy consisting of first and second order factors
 (also called unary and pairwise potentials), with learned potential functions.
 Let us denote the representation of an input image by $x$ and a labeling of
@@ -186,20 +186,20 @@ We learn the unary and pairwise energy functions $\psi_v$ and $\psi_{v, w}$ from
 using a structural support vector machine. 
 The concept of structural support vector machines allows for a principled,
 maximum-margin based, loss-sensitive training of conditional random fields, that allows much
-more complex interactions than the simple potts potentials that are often used in the literature.
+more complex interactions than the simple Potts potentials that are often used in the literature.
 
 In general, structural support vector machines learn the parameters $\theta$ of a predictor of the form
 \begin{equation}\eqlabel{prediction}
 f(x) = \argmax_{y \in \mathcal{Y}} \theta^T \Phi(x, y).
 \end{equation}
 We choose $\psi$ in \Eqref{energy} to be linear in the learnable parameters and
-the data dependend features, resulting in a form equivalent to
+the data-depended features, resulting in a form equivalent to
 \Eqref{prediction}. Our features are described in detail below.  We use the
 $1$-lack formulation of the structural SVM~\citep{joachims2009cutting} and
 solve the maximization in \Eqref{prediction} using a combination of fusion
 moves~\citep{lempitsky2010fusion} and the AD$^3$ algorithm of
 \citet{martins2011augmented}.  In contrast to graph-cut inference, fusion moves
-and AD$^3$ can work with arbitrary potential function, and allow percise
+and AD$^3$ can work with arbitrary potential function, and allow precise
 learning using the structural support vector machine approach.
 
 \subsection{Low Level Segmentation}
@@ -232,7 +232,7 @@ superpixels that are compact in 3D while maintaining a meaningful minimum size.
 \end{figure}
 
 \subsection{Unary Image Features}\seclabel{unaries}
-Our method builds on the probability output of a random forest, trained for pixelwise
+Our method builds on the probability output of a random forest, trained for pixel-wise
 classification of the structure classes.
 We use the GPU implementation provided by \citet{stueckler2013}.
 The input for training are the full RGB-D images, transformed to Lab
@@ -244,20 +244,20 @@ depth at the target pixel.
 We accumulate the probabilistic output for all pixels within a superpixel, and
 use the resulting distribution as a feature for the unary node potentials in our CRF model.
 We augment these prediction with another feature, based on the height of a superpixel in 3D.
-This is a very informative feature, in particular to determin the floor.
+This is a very informative feature, in particular to determine the floor.
 To compute the height of a (super) pixel, we first find the ``up'' direction.
 We use a very simple approach that we found effective: we cluster normal directions of all pixels
 into 10 clusters using $k$-means, and use the one that is most parallel to the $Y$ direction, which
 roughly corresponds to height in the dataset.
-We then project the 3D pointcloud given by the depth along this direction, and normalize the result between
+We then project the 3D point cloud given by the depth along this direction, and normalize the result between
 $0$ and $1$.
 This procedure works robustly given there is any horizontal area in the image,
 such as the ground or a table. A few scenes contain only walls and furniture,
 and the approach fails for these. \Figref{height} illustrates a typical case and
 one of the much rarer failure cases.
-While we could use a more elaborat scheme,
+While we could use a more elaborate scheme,
 such as the one from \citet{SilbermanECCV12}, we suspect that the feature is of
-little use in scenes without horizontale surfaces.
+little use in scenes without horizontal surfaces.
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{images/normal_feature}
@@ -265,7 +265,7 @@ little use in scenes without horizontale surfaces.
     \caption{%
         Visualization of one of the pairwise features, the similarity between superpixel normals.
         The image shows the zoom-in of a bedroom scene, together with the superpixel oversegmentation.
-        Lines connect adjacent superpixels, and line-stregth gives the magnitude of the orientation similarity.
+        Lines connect adjacent superpixels, and line-strength gives the magnitude of the orientation similarity.
     \figlabel{normal_feature}}
 \end{figure}
 
@@ -386,14 +386,14 @@ A visualization of the impact of each processing step can be found in
 \Figref{comparison}, which shows prediction results on the test set.  The for
 prediction methods correspond to the rows of \Tabref{results}.  The difference
 between the SVM and CRF approaches are clearly visible, with the CRF producing
-results that are very close to the ground truth in serveral complex scenes.
+results that are very close to the ground truth in several complex scenes.
 
 We found that our approach improves results most for scenes with a clear geometric structure,
 which is not surprising. We see that evidence from the random forest is often very noisy, and biased
 away from the ``props'' class. While the unstructured SVM can correct somewhat
 for the class imbalance, it has no way to make larger areas consistent, which
 the conditional random field can.
-On the other hand, performance of the CRF deteriorates sligthly on very crowded
+On the other hand, performance of the CRF deteriorates slightly on very crowded
 scenes with a mixture of small furniture and prop objects, as
 can be seen in the two right-most images. In these scenes, depth information is
 often noisy, and it is hard to make geometric statements on the superpixel
@@ -422,7 +422,7 @@ The potential of the depth feature encodes, for example, that the ground
 is usually behind the other classes, while furniture is in front of structures,
 such as the wall.
 Interestingly, the potential functions are not anti-symmetric, and forcing them to be so
-degrates the results. This suggests that the direction of connecting edges, going from
+degrades the results. This suggests that the direction of connecting edges, going from
 the top left to the bottom right in the image, is also exploited by the potentials.
 
 
@@ -492,7 +492,7 @@ We combine color, depth and 3D orientation features into an energy function that
  NYU V2 dataset for semantic annotation of structure classes.
 
 
-While our approach allows modelling of spacial relations, these are limited to
+While our approach allows modeling of spacial relations, these are limited to
 local interactions. In future work, these interactions could be extended to
 larger areas using latent variable models~\citep{dann2012pottics} or higher
 order potentials~\citep{kohli2009robust}.
