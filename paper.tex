@@ -1,0 +1,514 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+
+%\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out if you need a4paper
+
+\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4 paper
+
+\IEEEoverridecommandlockouts                              % This command is only needed if 
+                                                          % you want to use the \thanks command
+
+\overrideIEEEmargins                                      % Needed to meet printer requirements.
+
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+
+\makeatletter
+\let\NAT@parse\undefined
+\makeatother
+
+% The following packages can be found on http:\\www.ctan.org
+\usepackage{graphicx} % for pdf, bitmapped graphics files
+\usepackage{epsfig}
+\usepackage{refstyle}
+%\usepackage{epsfig} % for postscript graphics files
+%\usepackage{mathptmx} % assumes new font selection scheme installed
+%\usepackage{times} % assumes new font selection scheme installed
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{booktabs}
+\usepackage{tabu}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
+
+%\usepackage[numbers]{natbib}
+\usepackage[natbib, style=ieee]{biblatex}
+\addbibresource{paper.bib}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\title{\LARGE \bf
+Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of RGB-D Images
+}
+
+
+\author{Andreas C. M\"uller and Sven Behnke
+\thanks{All authors are with the Autonomous Intelligent Systems Group, Univer-
+        sity of Bonn, Germany. Email: amueller@ais.uni-bonn.de
+    }}
+
+
+\begin{document}
+
+
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+    We present a structured learning approach to semantic annotation of RGB-D
+    images. 
+    Our method learns to reason about spacial relations of objects and
+    fuses low-level class predictions to a consistent interpretation of a
+    scene. Our model incooporates color, depth and 3D scene features, on which
+    an energy function is learned to directly optimize object class prediction using
+    the loss-based maximum-margin principle of structural support vector machines.
+    %With the proliferation of cheap % TODO urghs formulation
+    %high-quality RGB-D sensors, it became possible to capture more and more
+    %data not only as color images, but with additional depth information. The
+    %depth channel provides important clues not only for scene structure, but
+    %also for predicting semantic object classes.
+    %We demonstrate how conditional random field learning, an approach
+    %that has shown great promise for RGB images, can exploit depth information
+    %to improve semantic interpretation of the scene.
+    We evaluate our approach on the NYU V2 dataset of indoor scenes, a challenging
+    dataset covering a wide variety of scene layouts and object classes. We
+    hard-code much less information about the scene layout into our model then previous
+    approaches, and instead learn object relations directly from the data. We
+    find that our conditional random field approach improves upon previous
+    work, setting a new state-of-the-art for the dataset.
+\end{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{INTRODUCTION}
+For robots to perform varied tasks in unstructured environments, understanding their
+sourroundings is essential. We formulate the problem of semantic annotation of maps
+as a dense labeling of RGB-D images into semantic classes. Dense labeling of objects
+and structure classes allows for a detailed reasoning about the scene.
+
+In this work, we propose the use of random forests combined with conditional
+random fields (CRFs) to perform robust estimation of structure classes in RGB-D
+images. The CRF is learned using a structural support vector machine,
+allowing it to integrate the noisy low-level information produced by a pixel-based
+random forest to a consistent interpretation of the scene.
+
+We thereby extend the success of learned conditional random field models for
+semantic segmentation in RGB images to the domain of 3D scenes.
+Our emphasis lies on expoiting the additional depth and 3D information in all
+procsessing steps, while relying on \emph{learning} to create a model that 
+is adjusted to the properties of the sensor input and environment.
+
+Our approach starts with a random forest, providing a noisy local estimate
+of semantic classes based on color and depth information. These estimates
+are grouped together using a superpixel approach, for which we extend previous
+superpixel algorithms from the RGB to the RGB-D domain.
+We then build a geometric model of the scene, based on the neighborhood graph
+of superpixels.  We use this graph not only to capture spacial relations in the
+2d plane of the image, but also to model object distances and surface angles in
+3d, using a point cloud generated from the RGB-D image.
+
+We access the accuracy of our model on the challenging NYU Segmentation V2
+dataset \citep{SilbermanECCV12}, where our model outperforms previous
+approaches.  Our analysis shows that while our random forest model
+already has competative performance, the superpixel-based grouping and in
+pariculare the loss-based learning are integral ingredients of the success of our method.
+
+\section{RELATED WORK}
+The task of dense semantic labeling in natural images has been widely studied
+in computer vision.  Our approach of using pixel-based low-level cues is
+similar to the work of \citet{shotton2006textonboost}, who introduced
+TextonBoost for semantic segmentation, and used a hand-coded CRF energy to
+model spacial interactions. More recent work usually employ learned conditional
+random fields, learning object interactions from the
+data to directly maximize a loss function~\citep{lucchi2013learning, krahenbuhl2012efficient},
+which is the approach we are following.
+
+Work using RGB-D data only recently emmerged with
+the availability of the NYU Depth Dataset V1~\citep{silberman2011indoor}.
+\citet{silberman2011indoor} captured a wide variety of indoor scence using a structured light sensor,
+and provided dense semantic object class annotation. Their work also introduced a baseline method
+for semantic segmentation of RGB-D image, which used an approach based on superpixels, interest
+point descriptors and a conditional random field. While pairwise potentials for the CRF were carfully
+designed for the dataset, potentials were either directly set by hand or estimated using empirical
+frequencies. This is in contrast to our work, which applies structured prediction techniques
+to learn potentials automatically to optimize predictive performance.
+\citet{ren2012rgb} focus on the design of features for semantic labeling of RGB-D data, and use
+a hierarchical segmentation to provide context. While they also define a conditional random field on superpixels,
+their model is again not learned, but a weighted potts model, using only a
+probability of boundary map, and not taking spacial layout into account at all.
+
+\citet{SilbermanECCV12} extendet the NYU Depth Dataset V1 to the NYU Depth Dataset V2 that we are also
+using in this work.  Their focus is on inferring support relations in indoor
+scence, such as objects resting on tables or shelfs, which in turn rest on the floor.
+Their approach is based on robust estimation of 3D plane hypotheses, which are then jointly
+optimized with support relations and structure classes.
+\citet{SilbermanECCV12} use a complex pipeline, employing significant domain knowledge.
+In this work, on the other hand, we try to learn all relevant domain specific features
+directly from the data, which allows us to out-perform the work of \citet{SilbermanECCV12}
+with respect to structure class segmentation.
+
+\citet{couprie-iclr-13} approach the task of semantic segmentation of structure classes
+in RGB-D using the paradigm of convolutional neural networks, extending
+previous work of \citet{farabet-pami-13} and \citet{schulz2012learning}.
+Similar to our approach, \citet{couprie-iclr-13} combine the output of a
+pixel-based, low-level learning algorithm with an independent unsupervised
+segmentation step. In contrast to their work, we improve our results by not
+only averaging predictions within superpixels, but also explicitly learning
+interactions between neighboring superpixels, favouring a consistent
+interpretation of the whole image.
+
+\citet{stueckler2013} proposed a real-time system for online learning and prediction of semantic classes.
+Their main contribution is the online integration of low-level predictions over multiple frames
+by estimating camera motion and building a 3D model of the scene.
+We use the implementation of random forest provided by \citet{stueckler2013}, but instead of
+integrating predictions over time, we focus on exploiting the structur within a single frame.
+
+\section{LEARNING DEPTH-SENSITVE CONDITIONAL RANDOM FIELDS}
+We take a conditional random field approach, whose nodes repesent a labeling of
+superpixels.  We use an energy consisting of first and second order factors
+(also called unary and pairwise potentials), with learned potential functions.
+Let us denote the representation of an input image by $x$ and a labeling of
+superpixels into semantic classes by $y$.  Then the general form of the energy is
+\begin{equation}\eqlabel{energy}
+    g(x, y) = \sum_{v \in V} \psi_v(x, y_v) + \sum_{(v, w) \in E} \psi_{v,w}(x, y_{v}, y_{w}).
+\end{equation}
+Here $V$ enumerates the superpixels, and $E\subset V \times V$ is a set of
+edges, encoding neighborhood between superpixels.
+
+We learn the unary and pairwise energy functions $\psi_v$ and $\psi_{v, w}$ from the training data
+using a structural support vector machine. 
+The concept of structural support vector machines allows for a principled,
+maximum-margin based, loss-sensitive training of conditional random fields, that allows much
+more complex interactions than the simple potts potentials that are often used in the literature.
+
+In general, structural support vector machines learn the parameters $\theta$ of a predictor of the form
+\begin{equation}\eqlabel{prediction}
+f(x) = \argmax_{y \in \mathcal{Y}} \theta^T \Phi(x, y).
+\end{equation}
+We choose $\psi$ in \Eqref{energy} to be linear in the learnable parameters and
+the data dependend features, resulting in a form equivalent to
+\Eqref{prediction}. Our features are described in detail below.  We use the
+$1$-lack formulation of the structural SVM~\citep{joachims2009cutting} and
+solve the maximization in \Eqref{prediction} using a combination of fusion
+moves~\citep{lempitsky2010fusion} and the AD$^3$ algorithm of
+\citet{martins2011augmented}.  In contrast to graph-cut inference, fusion moves
+and AD$^3$ can work with arbitrary potential function, and allow percise
+learning using the structural support vector machine approach.
+
+\subsection{Low Level Segmentation}
+We take a super-pixel based approach to semantic segmentation.
+Our superpixel generation is based on the SLIC algorithm~\citep{achanta2012slic}. We extend the
+standard SLIC algorithm, which works on the Lab space to also include 
+depth information. The resulting algorithm is a localized $k$-Means in Lab-D-XY space.
+Our implementation is publicly available through the scikit-image library\footnote{\url{http://scikit-image.org}}.
+Similar to \citet{SilbermanECCV12}, we found little visual improvement over the
+RGB segmentation when using additional depth information. On the other hand,
+estimation of per-superpixel features based on the 3D point cloud was more
+robust when including depth information into the superpixel procedure.
+%TODO visualize?
+The resulting superpixels are compact in the 2D image. As the corresponding point
+cloud is very sparse at depth jumps, it is unfortunately not possible to create
+superpixels that are compact in 3D while maintaining a meaningful minimum size.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{images/height_success}\\
+        \vspace{3mm}
+        \includegraphics[width=\linewidth]{images/height_failure}
+    \end{center}
+    \caption{%
+        Visualization of the height computed using the method described in \Secref{unaries}.
+        Input images are shown on the left (depth not shown), the computed height is depicted on the right.
+        The top row exemplifies a typical scene, while the bottom row shows a scene without horizontal
+        surfaces, where our method fails.
+    \figlabel{height}}
+\end{figure}
+
+\subsection{Unary Image Features}\seclabel{unaries}
+Our method builds on the probability output of a random forest, trained for pixelwise
+classification of the structure classes.
+We use the GPU implementation provided by \citet{stueckler2013}.
+The input for training are the full RGB-D images, transformed to Lab
+color space. Each tree in the forest uses training pixel only from a subset of
+training images. For each training image, an equal number of pixels for each
+occurring class is sampled. Split features are given by difference of regions
+on color or depth channels. Region size and offsets are normalized using the
+depth at the target pixel.
+We accumulate the probabilistic output for all pixels within a superpixel, and
+use the resulting distribution as a feature for the unary node potentials in our CRF model.
+We augment these prediction with another feature, based on the height of a superpixel in 3D.
+This is a very informative feature, in particular to determin the floor.
+To compute the height of a (super) pixel, we first find the ``up'' direction.
+We use a very simple approach that we found effective: we cluster normal directions of all pixels
+into 10 clusters using $k$-means, and use the one that is most parallel to the $Y$ direction, which
+roughly corresponds to height in the dataset.
+We then project the 3D pointcloud given by the depth along this direction, and normalize the result between
+$0$ and $1$.
+This procedure works robustly given there is any horizontal area in the image,
+such as the ground or a table. A few scenes contain only walls and furniture,
+and the approach fails for these. \Figref{height} illustrates a typical case and
+one of the much rarer failure cases.
+While we could use a more elaborat scheme,
+such as the one from \citet{SilbermanECCV12}, we suspect that the feature is of
+little use in scenes without horizontale surfaces.
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{images/normal_feature}
+    \end{center}
+    \caption{%
+        Visualization of one of the pairwise features, the similarity between superpixel normals.
+        The image shows the zoom-in of a bedroom scene, together with the superpixel oversegmentation.
+        Lines connect adjacent superpixels, and line-stregth gives the magnitude of the orientation similarity.
+    \figlabel{normal_feature}}
+\end{figure}
+
+\subsection{Pairwise Depth-Sensitive Features}
+There are five different features used to build pairwise potentials in our model:
+\begin{description}
+    \item[Constant] \hfill \\
+        A constant feature allows to model general neighborhood relations.
+
+    \item[Color Contrast] \hfill \\
+        We employ a non-linear color contrast, as is common in the computer
+        vision literature, between the superpixel mean colors $c_i$ and $c_j$:
+        \[\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right)\]
+
+    \item[Vertical Alignment] \hfill \\
+        We model the directed angle between superpixel centers in the 2d image
+        plane.  This allows the  model to learn that ``structure'' is above
+        ``floor'', but not the other way around.
+
+    \item[Depth Difference] \hfill \\
+        We include the signed depth difference between superpixels, which
+        allows the model to detect depth discontinuities that are not
+        represented in the 2d neighborhood graph of the superpixels.
+
+    \item[Normal Orientations] \hfill \\
+        Differences in normal vector orientation are a strong clue on
+        whether two superpixels belong to the same surface, and therefore the
+        same structural class.
+        We compute the orientation of normals in the 3D using the method of \citet{holz_2011_robocup},
+        as implemented in the point cloud library (pcl)\footnote{\url{http://pointclouds.org}}.
+        All normals within a superpixel are then averaged, to get a single orientation for each superpixel.
+        The feature is computed as $\frac{\pi}{4}$ minus the (undirected) angle between the normals belonging
+        to two adjacent superpixels.  
+        The feature is illustrated in \Figref{normal_feature}. The difference
+        in normal orientation highlights that pillow and wall are distinct
+        objects, even though there is no strong distinction in color or depth.
+\end{description}
+
+
+\section{EXPERIMENTS}
+
+\begin{table*}[t]
+\centering
+\begin{tabularx}{\linewidth}{@{\extracolsep{\fill}}lcccccc}
+\toprule
+                        & ground        &  structure    & furniture     & props         & class average   & pixel average\\
+\cmidrule(r){1-7}
+
+RF                      &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
+RF + SP                 &         92.5  &   83.3        & 73.8          & 13.9          &  65.7        &  70.1 \\ 
+RF + SP + SVM           &         94.3  &   78.3        & 62.5          & \textbf{46.0} &  70.3        &  69.8 \\
+RF + SP + CRF           &         94.8  &   78.7        &          70.8 & 41.6          &\textbf{71.5} &  \textbf{72.0} \\
+\cmidrule(r){1-7}
+\citet{SilbermanECCV12} &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
+\citet{couprie-iclr-13} &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
+\citet{stueckler2013}   & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
+
+\bottomrule
+\end{tabularx}
+    \caption{Quantitative comparison of the proposed method with the
+literature. The best value in each column is printed in bold. The upper part of
+the table shows contributions by different parts of our pipeline. RF stands for random forest prediction, RF + SP for aggregated
+random forests prediction within superpixels, RF + SP + SVM for an SVM trained on the unary potentials, and RF + SP + CRF is
+our proposed pipeline. We optimized our approach for class average
+accuracy.\tablabel{results}}
+\end{table*}
+
+We evaluate our approach on the public NYU depth V2 segmentation dataset of
+indoor scenes.  The dataset comes with a detailed annotation of 1449 indoor
+RGB-D images belonging to a wide variety of indoor scenes, categorized into 26
+scene classes.  The annotation contains four semantic structural classes:
+structure, floor, furniture and prop. There is an additional ``void'' class,
+which is used for object boundaries and hard-to-annotate regions. We follow the
+literature in excluding these pixels completely from the evaluation.
+We optimize our model for \emph{average class accuracy} (the mean of the
+diagonal of the confusion matrix), which puts more emphasis on the harder
+classes of props and furniture, which have smaller area than structure and
+floor.
+
+Our approach is implemented using our \textsc{PyStruct}
+library~\footnote{\url{http://pystruct.github.io}}.  The code for our
+experiments will be released upon acceptance. We use \textsc{scikit-learn}~\citep{pedregosa2011scikit}
+for $k$-means clustering and the SVM baseline.
+
+All hyper parameters were adjusted using 5-fold cross-validation. The
+hyper parameters of the random forests were found using the \texttt{hyperopt}
+framework of \cite{bergstra2011algorithms}. For the CRF model, the only
+hyper-parameters are related to the superpixel segmentation, and the single
+hyper-parameter $C$ of the structural SVM formulation. These were adjusted
+using standard grid-search.
+We found 500 superpixels per image to work best, which allow for a maximum
+performance of 95\% average class accuracy on the validation set.
+
+\subsection{Results}
+\Tabref{results} compares different components of our approach with the literature.
+Please note that we \emph{first} designed our final model, using only the
+validation data. We now report accuracies of simpler models for reference,
+however these results were not used for model selection. To separate
+the influence of loss-based training and the spacial reasoning of the conditional random field,
+we also train a standard support vector machine on the unary potentials for comparison.
+
+The random forest prediction, as reported in \citet{stueckler2013} is already quite competitive.
+Grouping into superpixels slightly improves performance, by removing
+high-frequency noise and snapping to object boundaries. Somewhat surprisingly,
+using a standard unstructured SVM with rescaled loss already advances the mean
+accuracy decidedly above the previous state-of-the art. We
+attribute this mostly to the ability of the SVM to more directly minimize the
+target loss, leading to a calibration for the actual error measure. On the
+other hand, the total accuracy only decreases by $0.3\%$, while the average
+accuracy increases by $4.5\%$. This means that the SVM can further exploit
+uncertainty within superpixels and correlations between classes.
+This performance is still improved upon, both in class average and pixel average performance
+by the learned conditional random field approach, yielding the best published result
+so far for both measures. The increase over the standard SVM is $1.2\%$ for class average accuracy
+and $2.2\%$ for pixel average accuracy.
+
+A visualization of the impact of each processing step can be found in
+\Figref{comparison}, which shows prediction results on the test set.  The for
+prediction methods correspond to the rows of \Tabref{results}.  The difference
+between the SVM and CRF approaches are clearly visible, with the CRF producing
+results that are very close to the ground truth in serveral complex scenes.
+
+We found that our approach improves results most for scenes with a clear geometric structure,
+which is not surprising. We see that evidence from the random forest is often very noisy, and biased
+away from the ``props'' class. While the unstructured SVM can correct somewhat
+for the class imbalance, it has no way to make larger areas consistent, which
+the conditional random field can.
+On the other hand, performance of the CRF deteriorates sligthly on very crowded
+scenes with a mixture of small furniture and prop objects, as
+can be seen in the two right-most images. In these scenes, depth information is
+often noisy, and it is hard to make geometric statements on the superpixel
+level. As the input from the random forest is also often of low quality for
+crowded scenes, the conditional random field has little chance to recover.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=.45\linewidth]{images/vertical_alignment}\vspace{1mm}
+    \includegraphics[width=.45\linewidth]{images/depth_difference}
+    \end{center}
+    \caption{%
+        Visualization of some of the learned potentials. The right potential is
+        applied to relative depth between superpixels, the second on the
+        feature encoding whether one superpixel is above the other in the
+        image. See text for details.
+    \figlabel{weights}}
+\end{figure}
+
+\Figref{weights} visualizes some learned potential functions.
+Higher values correspond to favored configurations. One can see that the
+vertical alignment potential expresses that the floor is much more likely to be below
+other classes. It also encodes the fact that props
+rest on furniture, but not the other way around.
+The potential of the depth feature encodes, for example, that the ground
+is usually behind the other classes, while furniture is in front of structures,
+such as the wall.
+Interestingly, the potential functions are not anti-symmetric, and forcing them to be so
+degrates the results. This suggests that the direction of connecting edges, going from
+the top left to the bottom right in the image, is also exploited by the potentials.
+
+
+\begin{figure*}
+    \begin{tabu} to \linewidth{@{}XXXXX@{}}
+    \includegraphics[width=\linewidth]{images/00845_image.png}&%
+    \includegraphics[width=\linewidth]{images/00781_image.png}&%
+    \includegraphics[width=\linewidth]{images/01331_image.png}&%
+    \includegraphics[width=\linewidth]{images/00118_image.png}&%
+    \includegraphics[width=\linewidth]{images/01203_image.png}\\
+    \multicolumn{5}{@{}c@{}}{Input Image}\\
+
+
+    \includegraphics[width=\linewidth]{images/00845_pixel.png}&%
+    \includegraphics[width=\linewidth]{images/00781_pixel.png}&%
+    \includegraphics[width=\linewidth]{images/01331_pixel.png}&%
+    \includegraphics[width=\linewidth]{images/00118_pixel.png}&%
+    \includegraphics[width=\linewidth]{images/01203_pixel.png}\\
+    \multicolumn{5}{@{}c@{}}{Random Forest Prediction}\\
+
+    \includegraphics[width=\linewidth]{images/00845_sp.png}&%
+    \includegraphics[width=\linewidth]{images/00781_sp.png}&%
+    \includegraphics[width=\linewidth]{images/01331_sp.png}&%
+    \includegraphics[width=\linewidth]{images/00118_sp.png}&%
+    \includegraphics[width=\linewidth]{images/01203_sp.png}\\
+    \multicolumn{5}{@{}c@{}}{Superpixel Voting}\\
+
+    \includegraphics[width=\linewidth]{images/00845_svm.png}&%
+    \includegraphics[width=\linewidth]{images/00781_svm.png}&%
+    \includegraphics[width=\linewidth]{images/01331_svm.png}&%
+    \includegraphics[width=\linewidth]{images/00118_svm.png}&%
+    \includegraphics[width=\linewidth]{images/01203_svm.png}\\
+    \multicolumn{5}{@{}c@{}}{Support Vector Machine on Superpixels}\\
+
+    \includegraphics[width=\linewidth]{images/00845_ssvm.png}&%
+    \includegraphics[width=\linewidth]{images/00781_ssvm.png}&%
+    \includegraphics[width=\linewidth]{images/01331_ssvm.png}&%
+    \includegraphics[width=\linewidth]{images/00118_ssvm.png}&%
+    \includegraphics[width=\linewidth]{images/01203_ssvm.png}\\
+    \multicolumn{5}{@{}c@{}}{Conditional Random Field on Superpixels}\\
+
+    \includegraphics[width=\linewidth]{images/00845_gt.png}&%
+    \includegraphics[width=\linewidth]{images/00781_gt.png}&%
+    \includegraphics[width=\linewidth]{images/01331_gt.png}&%
+    \includegraphics[width=\linewidth]{images/00118_gt.png}&%
+    \includegraphics[width=\linewidth]{images/01203_gt.png}\\
+    \multicolumn{5}{@{}c@{}}{Ground Truth}\\
+    \multicolumn{5}{@{}c@{}}{
+        \includegraphics[]{legend.pdf}
+    }
+    \end{tabu}
+\caption{%
+Qualitative evaluation of the conditional random field.
+The first three images illustrate errors in the original prediction that can be corrected, while
+the second two images illustrate failure modes. See the text for details. Pixels marked as void
+are excluded from the evaluation.
+\figlabel{comparison}}
+\end{figure*}
+
+\section{SUMMARY AND DISCUSSION}
+We introduce a conditional random field formulation for semantic segmentation
+of structure classes in RGB-D images. We base our model in the output of an efficient GPU implementation
+of random forest, and model spacial neighborhood using a superpixel-based approach.
+We combine color, depth and 3D orientation features into an energy function that is fully learned using 
+ the structural support vector machine approach.  By explicitly modeling 3D
+ relations in a fully learned framework, we improve the state-of-the art on the
+ NYU V2 dataset for semantic annotation of structure classes.
+
+
+While our approach allows modelling of spacial relations, these are limited to
+local interactions. In future work, these interactions could be extended to
+larger areas using latent variable models~\citep{dann2012pottics} or higher
+order potentials~\citep{kohli2009robust}.
+Another possible line of future work is to combine our approach with a more
+task-specific one, directly including support plane assumptions into the model, as done by
+\citet{SilbermanECCV12}.
+
+While this work did not explicitly address real time application, the random
+forest implementation that we build upon allows for real-time
+processing~\citep{stueckler2013}. The SLIC superpixel algorithm can also be
+implemented on GPU in real-time, as was demonstrated by \citep{ren2011gslic}, and similarly
+the normal features we use also have
+real-time capabilities~\citep{holz_2011_robocup}.
+Finally, fusion move inference for our model is very efficient for our model,
+opening up the possibility to implement our approach entirely in real time.
+
+\printbibliography{}
+
+\end{document}
