@@ -331,22 +331,26 @@ There are five different features used to build pairwise potentials in our model
                         & ground        &  structure    & furniture     & props         & class average   & pixel average\\
 \cmidrule(r){1-7}
 
-RF                      &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
-RF + SP                 &         92.5  &   83.3        & 73.8          & 13.9          &  65.7        &  70.1 \\ 
-RF + SP + SVM           &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
-RF + SP + CRF           &         94.9  &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
+RF                              &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
+RF + SP                         &         92.5  &   83.3        & \textbf{73.8} & 13.9          &  65.7        &  70.1 \\ 
+RF + SP + SVM                   &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
+RF + SP + CRF                   & \textbf{94.9} &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
 \cmidrule(r){1-7}
-\citet{SilbermanECCV12} &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
-\citet{couprie-iclr-13} &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
-\citet{stueckler2013}   & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
+\citet{SilbermanECCV12}         &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
+\citet{couprie-iclr-13}         &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
+\cmidrule(r){1-7}
+\citet{stueckler2013}$^\dagger$ & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
 
 \bottomrule
 \end{tabularx}
-\quad\\The best value in each column is printed in bold. The upper part of
+\quad\\The best value in each column is printed in bold$^\dagger$. The upper part of
 the table shows contributions by different parts of our pipeline. RF stands for random forest prediction, RF + SP for aggregated
 random forests prediction within superpixels, RF + SP + SVM for an SVM trained on the unary potentials, and RF + SP + CRF is
 our proposed pipeline. We optimized our approach for class average
-accuracy.
+accuracy.\\
+$^\dagger$ \footnotesize Note that the work of \citet{stueckler2013} is not directly
+comparable, as they integrated information over multiple frames, and did not
+measure accuracy for pixels without valid depth measurement.
 \end{table*}
 
 We evaluate our approach on the public NYU depth V2 segmentation dataset of
