@@ -17,9 +17,7 @@ visualizierung neu!
 
 sentence about border pixels in non-compact super-pixel comment?
 
-
-
-nur ersten zwei autoren?
+nach pairwise features: novelty,..... 
 
 
 
