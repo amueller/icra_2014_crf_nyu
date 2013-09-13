@@ -112,13 +112,24 @@ superpixel algorithms from the RGB to the RGB-D domain.
 We then build a geometric model of the scene, based on the neighborhood graph
 of superpixels.  We use this graph not only to capture spatial relations in the
 2D plane of the image, but also to model object distances and surface angles in
-3D, using a point cloud generated from the RGB-D image.
+3D, using a point cloud generated from the RGB-D image. The process is depicted
+in \Figref{teaser}.
 
 We assess the accuracy of our model on the challenging NYU Segmentation V2
 dataset \citep{SilbermanECCV12}, where our model outperforms previous
 approaches.  Our analysis shows that while our random forest model
 already has competitive performance, the superpixel-based grouping and in
 particular the loss-based learning are integral ingredients of the success of our method.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{images/teaser}
+    \end{center}
+    \caption{%
+        Visualization of the method proposed in this paper see \Secref{learning} for details.\label{teaser}
+    \figlabel{height}}
+\end{figure}
+
 
 \section{RELATED WORK}
 The task of dense semantic labeling in natural images has been widely studied
@@ -170,7 +181,7 @@ by estimating camera motion and building a 3D model of the scene.
 We use the implementation of random forest provided by \citet{stueckler2013}, but instead of
 integrating predictions over time, we focus on exploiting the structure within a single frame.
 
-\section{LEARNING DEPTH-SENSITVE CONDITIONAL RANDOM FIELDS}
+\section{LEARNING DEPTH-SENSITVE CONDITIONAL RANDOM FIELDS}\seclabel{learning}
 We take a conditional random field approach, whose nodes represent a labeling of
 superpixels.  We use an energy consisting of first and second order factors
 (also called unary and pairwise potentials), with learned potential functions.
@@ -202,21 +213,6 @@ moves~\citep{lempitsky2010fusion} and the AD$^3$ algorithm of
 and AD$^3$ can work with arbitrary potential function, and allow precise
 learning using the structural support vector machine approach.
 
-\subsection{Low Level Segmentation}
-We take a super-pixel based approach to semantic segmentation.
-Our superpixel generation is based on the SLIC algorithm~\citep{achanta2012slic}. We extend the
-standard SLIC algorithm, which works on the Lab space, to also include 
-depth information. The resulting algorithm is a localized $k$-Means in Lab-D-XY space.
-Our implementation is publicly available through the scikit-image library\footnote{\url{http://scikit-image.org}}.
-Similar to \citet{SilbermanECCV12}, we found little visual improvement over the
-RGB segmentation when using additional depth information. On the other hand,
-estimation of per-superpixel features based on the 3D point cloud was more
-robust when including depth information into the superpixel procedure.
-%TODO visualize?
-The resulting superpixels are compact in the 2D image. As the corresponding point
-cloud is very sparse at depth jumps, it is unfortunately not possible to create
-superpixels that are compact in 3D while maintaining a meaningful minimum size.
-
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{images/height_success}\\
@@ -230,6 +226,22 @@ superpixels that are compact in 3D while maintaining a meaningful minimum size.
         surfaces, where our method fails.
     \figlabel{height}}
 \end{figure}
+
+\subsection{Low Level Segmentation}
+We take a super-pixel based approach to semantic segmentation.
+Our superpixel generation is based on the SLIC algorithm~\citep{achanta2012slic}. We extend the
+standard SLIC algorithm, which works on the Lab space, to also include 
+depth information. The resulting algorithm is a localized $k$-Means in Lab-D-XY space.
+Our implementation is publicly available through the scikit-image library\footnote{\url{http://scikit-image.org}}.
+Similar to \citet{SilbermanECCV12}, we found little visual improvement over the
+RGB segmentation when using additional depth information. On the other hand,
+estimation of per-superpixel features based on the 3D point cloud was more
+robust when including depth information into the superpixel procedure.
+%TODO visualize?
+The resulting superpixels are compact in the 2D image. As the density of the
+corresponding point cloud is dependent on the depth, we did not succeed in
+creating superpixels that are compact in 3D while maintaining a meaningful
+minimum size.
 
 \subsection{Unary Image Features}\seclabel{unaries}
 Our method builds on the probability output of a random forest, trained for pixel-wise

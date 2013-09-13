@@ -11,15 +11,9 @@ nenad
 teaser / overview
 ------------------
 
-
-visualizierung neu!
-====================
-
-sentence about border pixels in non-compact super-pixel comment?
-
 nach pairwise features: novelty,..... 
 
-
+table ueberschrift! text darunter!
 
 
 joint estimation of structure class and other class? -> keine potentiale..
