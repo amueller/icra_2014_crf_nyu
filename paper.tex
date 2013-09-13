@@ -110,11 +110,11 @@ of semantic classes based on color and depth information. These estimates
 are grouped together using a superpixel approach, for which we extend previous
 superpixel algorithms from the RGB to the RGB-D domain.
 We then build a geometric model of the scene, based on the neighborhood graph
-of superpixels.  We use this graph not only to capture spacial relations in the
-2d plane of the image, but also to model object distances and surface angles in
-3d, using a point cloud generated from the RGB-D image.
+of superpixels.  We use this graph not only to capture spatial relations in the
+2D plane of the image, but also to model object distances and surface angles in
+3D, using a point cloud generated from the RGB-D image.
 
-We access the accuracy of our model on the challenging NYU Segmentation V2
+We assess the accuracy of our model on the challenging NYU Segmentation V2
 dataset \citep{SilbermanECCV12}, where our model outperforms previous
 approaches.  Our analysis shows that while our random forest model
 already has competitive performance, the superpixel-based grouping and in
@@ -125,14 +125,14 @@ The task of dense semantic labeling in natural images has been widely studied
 in computer vision.  Our approach of using pixel-based low-level cues is
 similar to the work of \citet{shotton2006textonboost}, who introduced
 TextonBoost for semantic segmentation, and used a hand-coded CRF energy to
-model spacial interactions. More recent work usually employ learned conditional
+model spatial interactions. More recent work usually employ learned conditional
 random fields, learning object interactions from the
 data to directly maximize a loss function~\citep{lucchi2013learning, krahenbuhl2012efficient},
 which is the approach we are following.
 
 Work using RGB-D data only recently emerged with
 the availability of the NYU Depth Dataset V1~\citep{silberman2011indoor}.
-\citet{silberman2011indoor} captured a wide variety of indoor scene using a structured light sensor,
+\citet{silberman2011indoor} captured a wide variety of indoor scenes using a structured light sensor,
 and provided dense semantic object class annotation. Their work also introduced a baseline method
 for semantic segmentation of RGB-D image, which used an approach based on superpixels, interest
 point descriptors and a conditional random field. While pairwise potentials for the CRF were carefully
@@ -142,7 +142,7 @@ to learn potentials automatically to optimize predictive performance.
 \citet{ren2012rgb} focus on the design of features for semantic labeling of RGB-D data, and use
 a hierarchical segmentation to provide context. While they also define a conditional random field on superpixels,
 their model is again not learned, but a weighted Potts model, using only a
-probability of boundary map, and not taking spacial layout into account at all.
+probability of boundary map, and not taking spatial layout into account at all.
 
 \citet{SilbermanECCV12} extended the NYU Depth Dataset V1 to the NYU Depth Dataset V2 that we are also
 using in this work.  Their focus is on inferring support relations in indoor
@@ -183,9 +183,9 @@ Here $V$ enumerates the superpixels, and $E\subset V \times V$ is a set of
 edges, encoding neighborhood between superpixels.
 
 We learn the unary and pairwise energy functions $\psi_v$ and $\psi_{v, w}$ from the training data
-using a structural support vector machine. 
+using a structural support vector machine~\citep{joachims2009cutting}. 
 The concept of structural support vector machines allows for a principled,
-maximum-margin based, loss-sensitive training of conditional random fields, that allows much
+maximum-margin based, loss-sensitive training of conditional random fields. Learning the potential yields much
 more complex interactions than the simple Potts potentials that are often used in the literature.
 
 In general, structural support vector machines learn the parameters $\theta$ of a predictor of the form
@@ -234,9 +234,9 @@ superpixels that are compact in 3D while maintaining a meaningful minimum size.
 \subsection{Unary Image Features}\seclabel{unaries}
 Our method builds on the probability output of a random forest, trained for pixel-wise
 classification of the structure classes.
-We use the GPU implementation provided by \citet{stueckler2013}.
+We use the GPU implementation provided by \citet{stueckler2013}\footnote{\url{https://github.com/deeplearningais/curfil}}.
 The input for training are the full RGB-D images, transformed to Lab
-color space. Each tree in the forest uses training pixel only from a subset of
+color space. Each tree in the forest uses training pixels only from a subset of
 training images. For each training image, an equal number of pixels for each
 occurring class is sampled. Split features are given by difference of regions
 on color or depth channels. Region size and offsets are normalized using the
@@ -264,7 +264,7 @@ little use in scenes without horizontal surfaces.
     \end{center}
     \caption{%
         Visualization of one of the pairwise features, the similarity between superpixel normals.
-        The image shows the zoom-in of a bedroom scene, together with the superpixel oversegmentation.
+        The image shows the zoom-in of a bedroom scene, together with the superpixel over-segmentation.
         Lines connect adjacent superpixels, and line-strength gives the magnitude of the orientation similarity.
     \figlabel{normal_feature}}
 \end{figure}
@@ -278,23 +278,23 @@ There are five different features used to build pairwise potentials in our model
     \item[Color Contrast] \hfill \\
         We employ a non-linear color contrast, as is common in the computer
         vision literature, between the superpixel mean colors $c_i$ and $c_j$:
-        \[\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right)\]
+        \[\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right).\]
 
     \item[Vertical Alignment] \hfill \\
-        We model the directed angle between superpixel centers in the 2d image
+        We model the directed angle between superpixel centers in the 2D image
         plane.  This allows the  model to learn that ``structure'' is above
         ``floor'', but not the other way around.
 
     \item[Depth Difference] \hfill \\
         We include the signed depth difference between superpixels, which
         allows the model to detect depth discontinuities that are not
-        represented in the 2d neighborhood graph of the superpixels.
+        represented in the 2D neighborhood graph of the superpixels.
 
     \item[Normal Orientations] \hfill \\
         Differences in normal vector orientation are a strong clue on
         whether two superpixels belong to the same surface, and therefore the
         same structural class.
-        We compute the orientation of normals in the 3D using the method of \citet{holz_2011_robocup},
+        We compute the 3D orientation of normals using the method of \citet{holz_2011_robocup},
         as implemented in the point cloud library (pcl)\footnote{\url{http://pointclouds.org}}.
         All normals within a superpixel are then averaged, to get a single orientation for each superpixel.
         The feature is computed as $\frac{\pi}{4}$ minus the (undirected) angle between the normals belonging
@@ -364,7 +364,7 @@ performance of 95\% average class accuracy on the validation set.
 Please note that we \emph{first} designed our final model, using only the
 validation data. We now report accuracies of simpler models for reference,
 however these results were not used for model selection. To separate
-the influence of loss-based training and the spacial reasoning of the conditional random field,
+the influence of loss-based training and the spatial reasoning of the conditional random field,
 we also train a standard support vector machine on the unary potentials for comparison.
 
 The random forest prediction, as reported in \citet{stueckler2013} is already quite competitive.
@@ -374,7 +374,7 @@ using a standard unstructured SVM with rescaled loss already advances the mean
 accuracy decidedly above the previous state-of-the art. We
 attribute this mostly to the ability of the SVM to more directly minimize the
 target loss, leading to a calibration for the actual error measure. On the
-other hand, the total accuracy only decreases by $0.3\%$, while the average
+other hand, the average pixel accuracy only decreases by $0.3\%$, while the average class
 accuracy increases by $4.5\%$. This means that the SVM can further exploit
 uncertainty within superpixels and correlations between classes.
 This performance is still improved upon, both in class average and pixel average performance
@@ -383,7 +383,7 @@ so far for both measures. The increase over the standard SVM is $1.2\%$ for clas
 and $2.2\%$ for pixel average accuracy.
 
 A visualization of the impact of each processing step can be found in
-\Figref{comparison}, which shows prediction results on the test set.  The for
+\Figref{comparison}, which shows prediction results on the test set.  The four
 prediction methods correspond to the rows of \Tabref{results}.  The difference
 between the SVM and CRF approaches are clearly visible, with the CRF producing
 results that are very close to the ground truth in several complex scenes.
@@ -485,14 +485,14 @@ are excluded from the evaluation.
 \section{SUMMARY AND DISCUSSION}
 We introduce a conditional random field formulation for semantic segmentation
 of structure classes in RGB-D images. We base our model in the output of an efficient GPU implementation
-of random forest, and model spacial neighborhood using a superpixel-based approach.
+of random forest, and model spatial neighborhood using a superpixel-based approach.
 We combine color, depth and 3D orientation features into an energy function that is fully learned using 
  the structural support vector machine approach.  By explicitly modeling 3D
  relations in a fully learned framework, we improve the state-of-the art on the
  NYU V2 dataset for semantic annotation of structure classes.
 
 
-While our approach allows modeling of spacial relations, these are limited to
+While our approach allows modeling of spatial relations, these are limited to
 local interactions. In future work, these interactions could be extended to
 larger areas using latent variable models~\citep{dann2012pottics} or higher
 order potentials~\citep{kohli2009robust}.
