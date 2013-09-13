@@ -305,7 +305,7 @@ There are five different features used to build pairwise potentials in our model
 \end{description}
 
 
-\section{EXPERIMENTS}
+\section{EXPERIMENTS}\seclabel{experiments}
 
 \begin{table*}[t]
 \centering
@@ -316,8 +316,8 @@ There are five different features used to build pairwise potentials in our model
 
 RF                      &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
 RF + SP                 &         92.5  &   83.3        & 73.8          & 13.9          &  65.7        &  70.1 \\ 
-RF + SP + SVM           &         94.3  &   78.3        & 62.5          & \textbf{46.0} &  70.3        &  69.8 \\
-RF + SP + CRF           &         94.8  &   78.7        &          70.8 & 41.6          &\textbf{71.5} &  \textbf{72.0} \\
+RF + SP + SVM           &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
+RF + SP + CRF           &         94.9  &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
 \cmidrule(r){1-7}
 \citet{SilbermanECCV12} &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
 \citet{couprie-iclr-13} &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
@@ -359,7 +359,7 @@ using standard grid-search.
 We found 500 superpixels per image to work best, which allow for a maximum
 performance of 95\% average class accuracy on the validation set.
 
-\subsection{Results}
+\subsection{Results}\seclabel{results}
 \Tabref{results} compares different components of our approach with the literature.
 Please note that we \emph{first} designed our final model, using only the
 validation data. We now report accuracies of simpler models for reference,
@@ -372,15 +372,15 @@ Grouping into superpixels slightly improves performance, by removing
 high-frequency noise and snapping to object boundaries. Somewhat surprisingly,
 using a standard unstructured SVM with rescaled loss already advances the mean
 accuracy decidedly above the previous state-of-the art. We
-attribute this mostly to the ability of the SVM to more directly minimize the
-target loss, leading to a calibration for the actual error measure. On the
-other hand, the average pixel accuracy only decreases by $0.3\%$, while the average class
-accuracy increases by $4.5\%$. This means that the SVM can further exploit
-uncertainty within superpixels and correlations between classes.
-This performance is still improved upon, both in class average and pixel average performance
-by the learned conditional random field approach, yielding the best published result
-so far for both measures. The increase over the standard SVM is $1.2\%$ for class average accuracy
-and $2.2\%$ for pixel average accuracy.
+attribute this mostly to the ability of the SVM to exploit correlation between
+classes and uncertainty within the superpixels.
+Additionally, the SVM has access to the ``height'' feature, that was not
+included in the random forest.
+This performance is still improved upon, both in class average and pixel
+average performance by the learned conditional random field approach, yielding
+the best published result so far for both measures. The increase over the
+standard SVM is $1.5\%$ for class average accuracy and $2.0\%$ for pixel
+average accuracy.
 
 A visualization of the impact of each processing step can be found in
 \Figref{comparison}, which shows prediction results on the test set.  The four
@@ -409,7 +409,7 @@ crowded scenes, the conditional random field has little chance to recover.
         Visualization of some of the learned potentials. The right potential is
         applied to relative depth between superpixels, the second on the
         feature encoding whether one superpixel is above the other in the
-        image. See text for details.
+        image. See \secref{results} for details.
     \figlabel{weights}}
 \end{figure}
 
@@ -433,7 +433,7 @@ the top left to the bottom right in the image, is also exploited by the potentia
     \includegraphics[width=\linewidth]{images/01331_image.png}&%
     \includegraphics[width=\linewidth]{images/00118_image.png}&%
     \includegraphics[width=\linewidth]{images/01203_image.png}\\
-    \multicolumn{5}{@{}c@{}}{Input Image}\\
+    \multicolumn{5}{@{}c@{}}{Input Image}\vspace{3mm}\\
 
 
     \includegraphics[width=\linewidth]{images/00845_pixel.png}&%
@@ -441,35 +441,35 @@ the top left to the bottom right in the image, is also exploited by the potentia
     \includegraphics[width=\linewidth]{images/01331_pixel.png}&%
     \includegraphics[width=\linewidth]{images/00118_pixel.png}&%
     \includegraphics[width=\linewidth]{images/01203_pixel.png}\\
-    \multicolumn{5}{@{}c@{}}{Random Forest Prediction}\\
+    \multicolumn{5}{@{}c@{}}{Random Forest Prediction}\vspace{3mm}\\
 
     \includegraphics[width=\linewidth]{images/00845_sp.png}&%
     \includegraphics[width=\linewidth]{images/00781_sp.png}&%
     \includegraphics[width=\linewidth]{images/01331_sp.png}&%
     \includegraphics[width=\linewidth]{images/00118_sp.png}&%
     \includegraphics[width=\linewidth]{images/01203_sp.png}\\
-    \multicolumn{5}{@{}c@{}}{Superpixel Voting}\\
+    \multicolumn{5}{@{}c@{}}{Superpixel Voting}\vspace{3mm}\\
 
     \includegraphics[width=\linewidth]{images/00845_svm.png}&%
     \includegraphics[width=\linewidth]{images/00781_svm.png}&%
     \includegraphics[width=\linewidth]{images/01331_svm.png}&%
     \includegraphics[width=\linewidth]{images/00118_svm.png}&%
     \includegraphics[width=\linewidth]{images/01203_svm.png}\\
-    \multicolumn{5}{@{}c@{}}{Support Vector Machine on Superpixels}\\
+    \multicolumn{5}{@{}c@{}}{Support Vector Machine on Superpixels}\vspace{3mm}\\
 
     \includegraphics[width=\linewidth]{images/00845_ssvm.png}&%
     \includegraphics[width=\linewidth]{images/00781_ssvm.png}&%
     \includegraphics[width=\linewidth]{images/01331_ssvm.png}&%
     \includegraphics[width=\linewidth]{images/00118_ssvm.png}&%
     \includegraphics[width=\linewidth]{images/01203_ssvm.png}\\
-    \multicolumn{5}{@{}c@{}}{Conditional Random Field on Superpixels}\\
+    \multicolumn{5}{@{}c@{}}{Conditional Random Field on Superpixels}\vspace{3mm}\\
 
     \includegraphics[width=\linewidth]{images/00845_gt.png}&%
     \includegraphics[width=\linewidth]{images/00781_gt.png}&%
     \includegraphics[width=\linewidth]{images/01331_gt.png}&%
     \includegraphics[width=\linewidth]{images/00118_gt.png}&%
     \includegraphics[width=\linewidth]{images/01203_gt.png}\\
-    \multicolumn{5}{@{}c@{}}{Ground Truth}\\
+    \multicolumn{5}{@{}c@{}}{Ground Truth}\vspace{3mm}\\
     \multicolumn{5}{@{}c@{}}{
         \includegraphics[]{legend.pdf}
     }
@@ -477,8 +477,8 @@ the top left to the bottom right in the image, is also exploited by the potentia
 \caption{%
 Qualitative evaluation of the conditional random field.
 The first three images illustrate errors in the original prediction that can be corrected, while
-the second two images illustrate failure modes. See the text for details. Pixels marked as void
-are excluded from the evaluation.
+the second two images illustrate failure modes. Pixels marked as void
+are excluded from the evaluation. See the \secref{results} for details.
 \figlabel{comparison}}
 \end{figure*}
 
@@ -497,8 +497,10 @@ local interactions. In future work, these interactions could be extended to
 larger areas using latent variable models~\citep{dann2012pottics} or higher
 order potentials~\citep{kohli2009robust}.
 Another possible line of future work is to combine our approach with a more
-task-specific one, directly including support plane assumptions into the model, as done by
-\citet{SilbermanECCV12}.
+task-specific one, directly including support plane assumptions into the model,
+as done by \citet{SilbermanECCV12}. Finally, we could also combine our
+single-frame approach with the approach of \citet{stueckler2013}, which fuses
+individual views in 3D to exploit temporal coherence.
 
 While this work did not explicitly address real time application, the random
 forest implementation that we build upon allows for real-time

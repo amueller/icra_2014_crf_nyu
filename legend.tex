@@ -11,14 +11,18 @@
 \begin{document}
     \begin{tikzpicture}
         \matrix [column sep=.5cm]{%
-        \node [rectangle, fill=ground, minimum width=.5cm,minimum height=.5cm] {};&
-        \node [draw=none] {Ground};&
+            \node [rectangle, fill=ground, minimum width=.5cm,minimum height=.5cm] {};&
+        \node [rectangle] {Ground};&
+        \node [rectangle, minimum width=.3cm] {};&
         \node [rectangle, fill=structure, minimum width=.5cm,minimum height=.5cm] {};&
-        \node [draw=none] {Structure};&
+        \node [rectangle] {Structure};&
+        \node [rectangle, minimum width=.3cm] {};&
         \node [rectangle, fill=furniture, minimum width=.5cm,minimum height=.5cm] {};&
         \node [draw=none] {Furniture};&
+        \node [rectangle, minimum width=.3cm] {};&
         \node [rectangle, fill=prop, minimum width=.5cm,minimum height=.5cm] {};&
         \node [draw=none] {Props};&
+        \node [rectangle, minimum width=.3cm] {};&
         \node [rectangle, fill=black, minimum width=.5cm,minimum height=.5cm] {};&
         \node [draw=none] {Void};\\
     };
