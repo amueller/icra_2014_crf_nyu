@@ -13,8 +13,6 @@ teaser / overview
 
 nach pairwise features: novelty,..... 
 
-table ueberschrift! text darunter!
-
 
 joint estimation of structure class and other class? -> keine potentiale..
 SIFT? meh meh meh!
