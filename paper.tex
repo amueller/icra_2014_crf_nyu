@@ -134,41 +134,41 @@ particular the loss-based learning are integral ingredients of the success of ou
 \section{RELATED WORK}
 The task of dense semantic annotation of 3D maps has seen an increased interest
 in recent years.  Early work includes \citet{nuchter2008towards}, who combine
-6D SLAM, surface annotation and object recognition, to build semantically
+6D SLAM, surface annotation, and object recognition to build semantically
 annotated maps. They demonstrate their approach on a mobile robot in an indoor
 environment.
 %
 More recently \citet{sengupta2012automatic} introduced a dataset of
 semantically annotated street-scenes in a closed track, captured as pairs of
 stereo images. They approach the task by jointly reasoning about 3D layout and
-semantic of the scenes and produce a dense labeling on image level.  In
+semantics of the scenes and produce a dense labeling on image level.  In
 \citet{senguptaurban}, they extend their approach to produce a volumetric
 reconstruction of the scene, together with a dense semantic labeling of the
 volumetric representation. Their approach to image segmentation is build on
-the hierarchical CRF apporach of
+the hierarchical CRF approach of
 \citet{ladicky2009associative}, which is similar in spirit to our approach,
 but uses Potts potentials together with cross-validation to set potentials.
 
 Recent approaches for indoor semantic annotation of maps mostly focused on
 RGB-D images, which are now easy to obtain using structured light sensors.
 \citet{stuckler2012semantic} used a Random Forest model to obtain a dense
-semantic labeling of images, integrating predictions over multiple views in 3D.
-They evaluated their approach on a limited set of table-top and indoors scenes.
+semantic labeling of images and integrated predictions over multiple views in 3D.
+They evaluated their approach on table-top and simple indoors scenes.
 %
-\citep{silberman2011indoor} introduced the NYU Depth Dataset V1 indoor dataset,
-which consisted of a large variety of densely annotated indoor scences, captured as RGB-D images.
+\citet{silberman2011indoor} introduced the NYU Depth Dataset V1 indoor dataset,
+which consisted of a large variety of densely annotated indoor scenes, captured as RGB-D images.
 Their work also introduced a baseline method for semantic segmentation of RGB-D
-image, which used an approach based on superpixels, interest point descriptors
-and a CRF.
+image, which is based on a CRF over superpixels, with unary potentials given by interest point descriptors.
 While pairwise potentials for the CRF were carefully
 designed for the dataset, potentials were either directly set by hand or estimated using empirical
 frequencies. This is in contrast to our work, which applies structured prediction techniques
 to learn potentials automatically to optimize predictive performance.
 %
-\citet{ren2012rgb} evaluated the design of features for semantic labeling of RGB-D data, and use
-a hierarchical segmentation to provide context. While they also define a CRF on superpixels,
-their model is again not learned, but a weighted Potts model, using only a
-probability of boundary map, and not taking spatial layout into account at all.
+\citet{ren2012rgb} evaluated the design of features for semantic labeling of
+RGB-D data, and use a hierarchical segmentation to provide context. While they
+also define a CRF on superpixels, their model is again not learned, but a
+weighted Potts model, using only a probability of boundary map, and not taking
+spatial layout into account at all.
 %
 \citet{SilbermanECCV12} extended the NYU Depth Dataset V1 to the NYU Depth Dataset V2 that we are also
 using in this work.  Their focus is on inferring support relations in indoor
@@ -201,9 +201,7 @@ focus on exploiting the structure within a single frame.
 
 While many of the works mentioned in this chapter make use of a CRF
 approach, we are not aware of any prior work on semantic annotation of 3D maps
-that fully learns their potentials. This allows our approach to infer
-the scene structure from the data, without the need to specify relevant relations
-by hand.
+that fully learns their potentials.
 %The task of dense semantic labeling in natural images has been widely studied
 %in computer vision.  Our approach of using pixel-based low-level cues is
 %similar to the work of \citet{shotton2006textonboost}, who introduced
@@ -309,11 +307,13 @@ little use in scenes without horizontal surfaces.
     \begin{center}
         \includegraphics[width=\linewidth]{images/normal_feature}
     \end{center}
+    \vspace{-3mm}
     \caption{%
         Visualization of one of the pairwise features, the similarity between superpixel normals.
         The image shows the zoom-in of a bedroom scene, together with the superpixel over-segmentation.
         Lines connect adjacent superpixels, and line-strength gives the magnitude of the orientation similarity.
     \figlabel{normal_feature}}
+    \vspace{-9mm}
 \end{figure}
 
 \subsection{Pairwise Depth-Sensitive Features}
@@ -326,7 +326,7 @@ There are five different features used to build pairwise potentials in our model
 \emph{Color Contrast}
     We employ a non-linear color contrast, as is common in the computer
     vision literature, between the superpixel mean colors $c_i$ and $c_j$:
-    \[\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right).\]
+    $\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right)$.
 
 
 \emph{Vertical Alignment}
@@ -385,6 +385,7 @@ accuracy.\\
 $^\dagger$ \footnotesize Note that the work of \citet{stueckler2013} is not directly
 comparable, as they integrated information over multiple frames, and did not
 measure accuracy for pixels without valid depth measurement.
+\vspace{-5mm}
 \end{table*}
 
 We evaluate our approach on the public NYU depth V2 segmentation dataset of
@@ -456,15 +457,17 @@ crowded scenes, the CRF has little chance to recover.
 
 \begin{figure}
     \begin{center}
-        \includegraphics[width=.45\linewidth]{images/vertical_alignment}\vspace{1mm}
+        \includegraphics[width=.45\linewidth]{images/vertical_alignment}
     \includegraphics[width=.45\linewidth]{images/depth_difference}
     \end{center}
+    \vspace{-3mm}
     \caption{%
         Visualization of some of the learned potentials. The right potential is
         applied to relative depth between superpixels, the second on the
         feature encoding whether one superpixel is above the other in the
         image. See \secref{results} for details.
     \figlabel{weights}}
+    \vspace{-3mm}
 \end{figure}
 
 \Figref{weights} visualizes some learned potential functions.
@@ -540,10 +543,10 @@ are excluded from the evaluation. See the \secref{results} for details.
 We introduce a CRF formulation for semantic segmentation
 of structure classes in RGB-D images. We base our model in the output of an efficient GPU implementation
 of random forest, and model spatial neighborhood using a superpixel-based approach.
-We combine color, depth and 3D orientation features into an energy function that is fully learned using 
- the SSVM approach. By explicitly modeling 3D
- relations in a fully learned framework, we improve the state-of-the art on the
- NYU V2 dataset for semantic annotation of structure classes.
+We combine color, depth and 3D orientation features into an energy function
+that is learned using the SSVM approach. By explicitly modeling 3D relations in
+a fully learned framework, we improve the state-of-the art on the NYU V2
+dataset for semantic annotation of structure classes.
 
 
 While our approach allows modeling of spatial relations, these are limited to
