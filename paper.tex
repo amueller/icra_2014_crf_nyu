@@ -126,8 +126,8 @@ particular the loss-based learning are integral ingredients of the success of ou
         \includegraphics[width=\linewidth]{images/teaser}
     \end{center}
     \caption{%
-        Overview of the proposed semantic segmentation method.\label{teaser}
-    \figlabel{height}}
+        Overview of the proposed semantic segmentation method.\figlabel{teaser}
+    }
 \end{figure}
 
 
@@ -398,21 +398,25 @@ literature in excluding these pixels completely from the evaluation.
 We optimize our model for \emph{average class accuracy} (the mean of the
 diagonal of the confusion matrix), which puts more emphasis on the harder
 classes of props and furniture, which have smaller area than structure and
-floor.
+floor. The dataset is split into 795 images for training and 654 images for testing.
 
 Our approach is implemented using our \textsc{PyStruct}
 library\footnote{\url{http://pystruct.github.io}}.  The code for our
 experiments will be released upon acceptance. We use \textsc{scikit-learn}~\citep{pedregosa2011scikit}
 for $k$-means clustering and the SVM baseline.
 
-All hyper parameters were adjusted using 5-fold cross-validation. The
+All hyper parameters were adjusted using 5-fold cross-validation on the training set. The
 hyper parameters of the random forests were found using the \texttt{hyperopt}
 framework of \cite{bergstra2011algorithms}. For the CRF model, the only
 hyper-parameters are related to the superpixel segmentation, and the single
 hyper-parameter $C$ of the structural SVM formulation. These were adjusted
-using grid-search.
+using grid-search. 
 We found 500 superpixels per image to work best, which allow for a maximum
 possible performance of 95\% average class accuracy on the validation set.
+Training of the random forests took about 15 minutes on a NVIDIA GeForce GTX
+Titan. Training the structural SVM took 45 minutes on a Xeon X5650 CPU.
+Prediction using only the random forest takes 33ms on average, while segmentation and prediction
+using the structural SVM approximately take an additional 500ms.
 
 \subsection{Results}\seclabel{results}
 \Tabref{results} compares different components of our approach with the literature.
@@ -454,23 +458,23 @@ can be seen in the two right-most images. In these scenes, depth information is
 often noisy, and it is hard to make geometric statements on the superpixel
 level. As the input from the random forest is also often of low quality for
 crowded scenes, the CRF has little chance to recover.
+\Figref{weights} visualizes some learned potential functions.
 
 \begin{figure}
     \begin{center}
         \includegraphics[width=.45\linewidth]{images/vertical_alignment}
     \includegraphics[width=.45\linewidth]{images/depth_difference}
     \end{center}
-    \vspace{-3mm}
+    \vspace{-6mm}
     \caption{%
         Visualization of some of the learned potentials. The right potential is
         applied to relative depth between superpixels, the second on the
         feature encoding whether one superpixel is above the other in the
         image. See \secref{results} for details.
     \figlabel{weights}}
-    \vspace{-3mm}
+    \vspace{-6mm}
 \end{figure}
 
-\Figref{weights} visualizes some learned potential functions.
 Higher values correspond to favored configurations. One can see that the
 vertical alignment potential expresses that the floor is much more likely to be below
 other classes. It also encodes the fact that props
@@ -540,14 +544,15 @@ are excluded from the evaluation. See the \secref{results} for details.
 \end{figure*}
 
 \section{SUMMARY AND DISCUSSION}
+\enlargethispage{5mm}
 We introduce a CRF formulation for semantic segmentation
-of structure classes in RGB-D images. We base our model in the output of an efficient GPU implementation
-of random forest, and model spatial neighborhood using a superpixel-based approach.
+of structure classes in RGB-D images. We base our model on the output of an
+efficient GPU implementation of random forest, and model spatial neighborhood
+using a superpixel-based approach.
 We combine color, depth and 3D orientation features into an energy function
 that is learned using the SSVM approach. By explicitly modeling 3D relations in
-a fully learned framework, we improve the state-of-the art on the NYU V2
+a fully learned framework, we improve the state-of-the-art on the NYU V2
 dataset for semantic annotation of structure classes.
-
 
 While our approach allows modeling of spatial relations, these are limited to
 local interactions. In future work, these interactions could be extended to
