@@ -397,7 +397,7 @@ We optimize our model for \emph{average class accuracy} (the mean of the
 diagonal of the confusion matrix), putting more emphasis on the harder
 classes of props and furniture, which have smaller area than structure and
 floor. The dataset is split into 795 images for training and 654 images for testing.
-
+%
 Our approach is implemented using our \textsc{PyStruct}
 library\footnote{\url{http://pystruct.github.io}}.  We use \textsc{scikit-learn}~\citep{pedregosa2011scikit}
 for $k$-means clustering and the SVM baseline.
@@ -415,7 +415,9 @@ Titan. Training the structural SVM took 45\,minutes on a Xeon X5650 CPU.
 Prediction using only the random forest takes 33\,ms on average, while segmentation and prediction
 using the structural SVM approximately take an additional 500\,ms.
 
+\vspace{-2mm}
 \subsection{Results}\seclabel{results}
+\vspace{-1mm}
 \Tabref{results} compares different components of our approach with the literature.
 Please note that we \emph{first} designed our final model, using only the
 validation data. We now report accuracies of simpler models for reference,
@@ -443,7 +445,7 @@ A visualization of the impact of each processing step can be found in
 prediction methods correspond to the rows of \Tabref{results}.  The difference
 between the SVM and CRF approaches are clearly visible, with the CRF producing
 results that are very close to the ground truth in several complex scenes.
-
+%
 We found that our approach improves results most for scenes with a clear geometric structure,
 which is not surprising. We see that evidence from the random forest is often very noisy, and biased
 away from the ``props'' class. While the unstructured SVM can correct somewhat
@@ -455,7 +457,6 @@ can be seen in the two right-most images. In these scenes, depth information is
 often noisy, and it is hard to make geometric statements on the superpixel
 level. As the input from the random forest is also often of low quality for
 crowded scenes, the CRF has little chance to recover.
-
 
 \begin{figure}
     \begin{center}
@@ -472,16 +473,20 @@ crowded scenes, the CRF has little chance to recover.
 \end{figure}
 
 \Figref{weights} visualizes two of the learned potential functions.
-Higher values correspond to favored configurations. One can see that the
-vertical alignment potential expresses that the floor is much more likely to be below
-other classes. It also encodes the fact that props
-rest on furniture, but not the other way around.
-The potential of the depth feature encodes, for example, that the ground
-is usually behind the other classes, while furniture is in front of structures,
-such as the wall.
-Interestingly, the potential functions are not anti-symmetric, and forcing them to be so
-degrades the results. This suggests that the direction of connecting edges, going from
-the top left to the bottom right in the image, is also exploited by the potentials.
+Higher values correspond to favored configurations. We did not force potentials
+to be symmetric or anti-symmetric, which makes interpretation of the figures a
+bit harder, but increases performance.
+Edges are constructed to go from top left to bottom right. Potentials below the
+diagonal are those for an edge going from a label given by the column to the
+one given by the row, while the ones above the diagonal are for the opposite
+direction.  For vertical alignment, one would therfore expect to find
+anti-symmetric potentials. However the left-right direction
+seems to also contain useful information, breaking the symmetry.
+One can see that the vertical alignment potential expresses that the floor is
+much more likely to be below other classes. It also encodes the fact that props
+rest on furniture, but not the other way around.  The potential of the depth
+feature encodes, for example, that the ground is usually behind the other
+classes, while furniture is in front of structures, such as the wall.
 
 
 \begin{figure*}
@@ -540,7 +545,6 @@ the second two images illustrate failure modes. Pixels marked as void
 are excluded from the evaluation. See the \secref{results} for details.
 \figlabel{comparison}}
 \end{figure*}
-
 \section{SUMMARY AND DISCUSSION}
 \enlargethispage{5mm}
 We introduce a CRF formulation for semantic segmentation
@@ -551,7 +555,7 @@ We combine color, depth and 3D orientation features into an energy function
 that is learned using the SSVM approach. By explicitly modeling 3D relations in
 a fully learned framework, we improve the state-of-the-art on the NYU V2
 dataset for semantic annotation of structure classes.
-
+%
 While our approach allows modeling of spatial relations, these are limited to
 local interactions. In future work, these interactions could be extended to
 larger areas using latent variable models or higher order potentials~\citep{ladicky2009associative}.
@@ -560,7 +564,7 @@ task-specific one, directly including support plane assumptions into the model,
 as done by \citet{SilbermanECCV12}. Finally, we could also combine our
 single-frame approach with the approach of \citet{stueckler2013}, which fuses
 individual views in 3D to exploit temporal coherence.
-
+%
 While this work did not explicitly address real time application, the random
 forest implementation that we build upon allows for real-time
 processing~\citep{stueckler2013}. The SLIC superpixel algorithm can also be
