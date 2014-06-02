@@ -23,6 +23,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\ForAll}{\bigwedge}
 \DeclareMathOperator*{\Exists}{\bigvee}
+\newcommand{\hoch}[1]{^{#1}}
 \newcommand{\W}{\mathcal{W}}
 
 \newcommand*\kreis[2]{\unitlength0.7ex\begin{picture}(2.5,2.5)%
@@ -83,59 +84,87 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
 	\begin{document}
 
-	\begin{frame}[plain]
-		\titlepage
-	\end{frame}
+    \begin{frame}[plain]
+        \titlepage
+    \end{frame}
 
     \section*{Introduction}
 
 	\begin{frame}
 		\frametitle{Semantic Segmentation of Structure Classes}
-        %FIXME
             \begin{figure}
                 \begin{onlyenv}<1-2>
-                \includegraphics[width=.4 \textwidth]{images/01124_image}
+                \includegraphics[width=.4 \textwidth]{images/00062_image}
                 \end{onlyenv}
-                %\begin{onlyenv}<3>
-                %\includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
-                %\end{onlyenv}
+                \begin{onlyenv}<3>
+                \includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
+                \end{onlyenv}
                 \begin{visibleenv}<2->
-                    \includegraphics[width=.4 \textwidth]{images/01124_gt}
+                    \includegraphics[width=.4 \textwidth]{images/00062_gt}
                 \end{visibleenv}
             \end{figure}
 
 	\end{frame}
 
+    \begin{frame}
+        \frametitle{Dataset: NYUv2}
+        \begin{tabularx}{\linewidth}{@{\extracolsep{\fill}}ccccc}
+
+        \includegraphics[width=.22\textwidth]{images/00118_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/00118_gt.png}&
+        \includegraphics[width=.22\textwidth]{images/01203_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/01203_gt.png}\\
+
+        \includegraphics[width=.22\textwidth]{images/01147_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/01147_gt.png}&
+        \includegraphics[width=.22\textwidth]{images/00281_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/00281_gt.png}\\
+
+        \includegraphics[width=.22\textwidth]{images/00191_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/00191_gt.png}&
+        \includegraphics[width=.22\textwidth]{images/01052_image.png}&%
+        \includegraphics[width=.22\linewidth]{images/01052_gt.png}\\
+
+        \end{tabularx}
+        \includegraphics[width=\linewidth]{legend.pdf}\\
+        795 training images, 654 test images.
+    \end{frame}
+    
+
     \section{Structured prediction formulation}
 
-    %\begin{frame}
-        %\frametitle{Semantic Segmentation as Structured Prediction}
-        %FIXME
-        %\begin{figure}
-            %\includegraphics<1-2>[width=.6\linewidth]{images/scene_sp_gt}
-            %\includegraphics<3->[width=.6\linewidth]{images/scene_sp_graph}
-        %\end{figure}
-    %\end{frame}
+    \begin{frame}
+        \frametitle{Semantic Segmentation as Structured Prediction}
+        \begin{figure}
+            \includegraphics<1>[width=.6\linewidth]{images/00062_pipeline_sp_cheated}
+            \includegraphics<2>[width=.6\linewidth]{images/00062_pipeline_sp_graph_cheated}
+        \end{figure}
+    \end{frame}
 
     \begin{frame}
         \frametitle{Structured Prediction}
         Learn prediction function of the form
         \[f(x, w) := \argmax_{y \in \mathcal{Y}}  w^T \psi(x, y) \]
-        \begin{visibleenv}<2->
+        \begin{visibleenv}<1->
+            Objective
+            \begin{align}
+                &\min_w \frac{1}{2} ||w||^2 + C \sum_i  \ell(x\hoch{i}, y\hoch{i}, w)\\
+                &\ell(x\hoch{i}, y\hoch{i}, w) = [\max_{y \in \mathcal{Y}} \Delta(y\hoch{i}, y) + w^T \Phi(x\hoch{i}, y) - w^T \psi(x\hoch{i}, y\hoch{i})]_+.
+            \end{align}
+        \end{visibleenv}
+
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Pairwise models}
             Pairwise model:
             \[w^T \psi(x, y) = \sum_{(i, j) \in E} w_{i,j} \psi_{i,j}(x, y_i, y_j) + \sum_i w_i \psi_i(x, y_i)\]
-        \end{visibleenv}
-        \begin{visibleenv}<3->
-        Objective
-        \end{visibleenv}
-        \begin{visibleenv}<4->
+        \begin{visibleenv}<2->
             \begin{align*}
                 \psi_i(x, y_i) &= f(x_i) \otimes 1_{y_i}\\
                 \psi_i(x, y_i, y_j) &= f(x_i, x_j) \otimes 1_{y_i} \otimes 1_{y_j}
             \end{align*}
         \end{visibleenv}
-        % FIXME
-
     \end{frame}
 
     \section{Unary and Pairwise Features}
@@ -151,15 +180,15 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
     \begin{frame}
         \frametitle{Absolute height potentials}
             \[
-                f_{\text{height}}(x_i) = \textbf{n}_{\text{up}}^T \textbf{n}_{x_i}
+                f_{\text{height}}(x_i) = \textbf{n}_{\text{flat}}^T \textbf{n}_{x_i}
             \]
-        \begin{visibleenv}<2->
+        %\begin{visibleenv}<2->
         \begin{center}
             \includegraphics[width=.6\linewidth]{images/height_success}\\
             \vspace{3mm}
             \includegraphics[width=.6\linewidth]{images/height_failure}
         \end{center}
-        \end{visibleenv}
+        %\end{visibleenv}
 
     \end{frame}
 
@@ -169,11 +198,11 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
         \[
         f_\text{color}(x_i, x_j) = \exp\left(-\gamma \lVert c_i - c_j \rVert^2\right).
          \]
-        \begin{visibleenv}<2->
+        %\begin{visibleenv}<2->
             \begin{center}
-                \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_1}
+                \includegraphics[width=.6\linewidth]{images/00062_pipline_feature_pairwise_1}
             \end{center}
-        \end{visibleenv}
+        %\end{visibleenv}
 
     \end{frame}
 
@@ -182,36 +211,36 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
         \[
             f_\text{direction}(x_i, x_j) = \sphericalangle(\text{pos}_{x_i} - \text{pos}_{x_j}, [0, 1]^T)
          \]
-        \begin{visibleenv}<2->
+        %\begin{visibleenv}<2->
         \begin{center}
-            \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_4}
+            \includegraphics[width=.6\linewidth]{images/00062_pipline_feature_pairwise_4}
         \end{center}
-        \end{visibleenv}
+        %\end{visibleenv}
     \end{frame}
 
     \begin{frame}
         \frametitle{Depth Difference}
         \[
-            f_\text{depth}(x_i, x_j) = d_i - d_j / Z
+            f_\text{depth}(x_i, x_j) = (d_i - d_j) / Z
          \]
-        \begin{visibleenv}<2->
+        %\begin{visibleenv}<2->
         \begin{center}
-            \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_2}
+            \includegraphics[width=.6\linewidth]{images/00062_pipline_feature_pairwise_2}
         \end{center}
-        \end{visibleenv}
+        %\end{visibleenv}
     \end{frame}
     
 
     \begin{frame}
         \frametitle{Pairwise Normal Orientation}
         \[
-            f_\text{normals}(x_i, x_j) = \frac{1}{\pi}\sphericalangle(\mathbf{n}_{x_i}, \mathbf{n}_{x_j})
+            f_\text{normals}(x_i, x_j) = 1 - \frac{1}{\pi}\sphericalangle(\mathbf{n}_{x_i}, \mathbf{n}_{x_j})
          \]
-        \begin{visibleenv}<2->
+        %\begin{visibleenv}<2->
         \begin{center}
             \includegraphics[width=.6\linewidth]{images/normal_feature}
         \end{center}
-        \end{visibleenv}
+        %\end{visibleenv}
     \end{frame}
 
 
@@ -225,16 +254,6 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
     \end{frame}
 
     \begin{frame}
-        \frametitle{How intractable are loopy models?}
-        %FIXME
-        \begin{itemize}
-            \item In general, inference in loopy models is NP-hard.
-            \item Learning relies on inference.
-            \item Combining several inference algorithms, we can get exact results in practice. %FIXME reference
-        \end{itemize}
-    \end{frame}
-
-    \begin{frame}
         \frametitle{Summary}
         \begin{center}
             \includegraphics[width=.9\linewidth]{images/teaser}
@@ -243,17 +262,6 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
     \section{Experiments}
     
-    \begin{frame}
-        \frametitle{Dataset}
-        %TODO
-    \end{frame}
-    
-
-    \begin{frame}
-        \frametitle{Experimental Protocol}
-        %TODO
-    \end{frame}
-
     \begin{frame}
         \frametitle{Results}
         \begin{table}[t]
@@ -275,6 +283,9 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
         \bottomrule
         \end{tabularx}
         \end{table}
+        \begin{visibleenv}<1->
+        Can learn loopy model exactly~\citep{mueller2014_exact}.
+        \end{visibleenv}
     \end{frame}
 
     \begin{frame}
