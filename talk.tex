@@ -1,0 +1,429 @@
+
+\documentclass[final,ignorenonframetext,compress]{beamer}
+
+\mode<beamer>
+{
+\usetheme{Bonn}
+\pgfdeclareimage[height=0.8cm]{university-logo}{images/Logo_UBo_h24_4c-crop}
+\setbeamertemplate{footline}[default]
+\logo{\pgfuseimage{university-logo}}
+\setbeamertemplate{navigation symbols}{}
+}
+\mode<handout>{
+\usetheme{default}
+\usecolortheme{dove}
+\setbeamercolor{background canvas}{bg=black!5}
+\usepackage{pgfpages}
+\pgfpagesuselayout{8 on 1}[a4paper,border shrink=5mm]
+}
+\usepackage{natbib}
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+\DeclareMathOperator*{\mymax}{max}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\ForAll}{\bigwedge}
+\DeclareMathOperator*{\Exists}{\bigvee}
+\newcommand{\W}{\mathcal{W}}
+
+\newcommand*\kreis[2]{\unitlength0.7ex\begin{picture}(2.5,2.5)%
+
+
+	\color{#2}%
+	\put(0.75,0.75){\circle*{3}}%
+	\color{black}%
+	\put(0.75,0.75){\circle{3}}%
+	\put(0.7,0.7){\makebox(0,0){#1}}\end{picture}}
+	\newcommand\itplus{\kreis{$+$}{green}}
+	\newcommand\itminus{\kreis{$-$}{red}}
+	\newcommand\prob[2]{\ensuremath{p_{\mathrm{#1}}\left( #2 \right)}}
+	\newcommand\bedprob[3]{\ensuremath{p_{\mathrm{#1}}\left( #2 \left|#3\right. \right)}}
+
+    \newcommand\etal{et.\,al.}
+
+	\usepackage[english]{babel}
+	% avant, courier, chancery, times, palatino, bookman, 
+	% newcent, utopia, charter
+	%\usepackage{times}
+
+	\usepackage[latin1]{inputenc}
+	\usepackage[T1]{fontenc}
+	\usepackage{multicol}
+	\usepackage{mdwtab}
+	\usepackage{booktabs}
+    \usepackage{tabularx}
+	\usepackage{txfonts,textcomp}
+	\usepackage{amsmath}
+	\usepackage{amsfonts}
+
+	\setlength\parindent{0cm}
+	\setlength\parskip{2mm}
+	\setbeamerfont{gross}{size=\large}
+	\setbeamerfont{quetsch}{size=\tiny}
+	\setbeamerfont{klein}{size=\footnotesize}
+	\newcommand\w[1]{\mathbf{#1}}
+
+	% example list spacing
+	\newcommand\ml{\setlength\itemindent{-11mm}}
+
+    \newcommand{\newblock}{}
+
+
+	\title{
+Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of RGB-D Images
+    } 
+    \author[short]{Andreas M\"uller}%
+	\institute[UBO]{%
+    Advisor: Sven Behnke\\
+    Institute for Autonomous Intelligent Systems\\
+	Rheinische Friedrich-Wilhelms-Universit\"at\\[4mm]
+	\includegraphics[width=.2\linewidth]{images/Logo_UBo_h24_4c-crop}\\[3mm]
+	Bonn, Germany}
+
+
+	\begin{document}
+
+	\begin{frame}[plain]
+		\titlepage
+	\end{frame}
+
+    \section*{Introduction}
+
+	\begin{frame}
+		\frametitle{Semantic Segmentation}
+            \begin{figure}
+                \includegraphics[width=.4 \textwidth]{images/pascal}
+                \begin{visibleenv}<2->
+                    \includegraphics[width=.4 \textwidth]{images/pascal_gt}
+                \end{visibleenv}
+            \end{figure}
+        \begin{itemize}
+            \item<3-> Label each pixel with semantic class.
+            \item<4-> Important step towards scene understanding.
+        \end{itemize}
+
+	\end{frame}
+
+    %\begin{frame}
+        %\frametitle{Semantic Segmentation using Super Pixels}
+        %\begin{figure}
+            %\includegraphics<1>[width=.6\linewidth]{images/scene_sp_org}
+            %\includegraphics<2->[width=.6\linewidth]{images/scene_sp}
+        %\end{figure}
+        %\vspace{-5mm}
+        %Grouping pixels into superpixels:
+        %\begin{itemize}
+            %\item Reduces the computational burden.
+            %\item Provides more context for classification.
+        %\end{itemize}
+    %\end{frame}
+
+    \section{Structured prediction formulation}
+
+    \begin{frame}
+        \frametitle{Semantic Segmentation as Structured Prediction}
+        \begin{figure}
+            \includegraphics<1-2>[width=.6\linewidth]{images/scene_sp_gt}
+            \includegraphics<3->[width=.6\linewidth]{images/scene_sp_graph}
+        \end{figure}
+        \vspace{-5mm}
+        \begin{itemize}
+            \item<1->Predict class for each superpixel.
+            \item<2->Predictions clearly not independent.
+            \item<3->Use neighborhood structure to model correlations.
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Structured Prediction}
+        Learn prediction function of the form
+        \[f(x, w) := \argmax_{y \in \mathcal{Y}}  w^T \psi(x, y) \]
+        \begin{visibleenv}<2->
+        where
+        \begin{itemize}
+            \item $x$ is the input.
+            \item $w$ are the parameter of the model to be learned.
+            \item $\psi(x, y)$ is a joint feature function of $x$ and potential labeling $y$.
+            \item $\mathcal{Y}$ is the output space (often exponentially large).
+        \end{itemize}
+        \end{visibleenv}
+    \end{frame}
+
+    \section{Model and Features}
+    \begin{frame}
+        \frametitle{Superpixels}
+        % image + formular!
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Pairwise Models}
+        Typically $\psi$ decomposes over pairs of entries $(y_i, y_j)$:
+        \[w^T \psi(x, y) = \sum_{(i, j) \in E} w_{i,j} \psi_{i,j}(x, y_i, y_j) + \sum_i w_i \psi_i(x, y_i)\]
+        \vspace{-8mm}
+        \begin{visibleenv}<2->
+            \begin{center}
+                \includegraphics[width=.5 \linewidth]{images/scene_sp_graph}
+            \end{center}
+        \end{visibleenv}
+        \vspace{-5mm}
+        \begin{visibleenv}<3->
+            In loopy models, exact inference is intractable in general, but many approximations are available.
+        \end{visibleenv}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Random Forest Unary Potentials}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Absolute height potentials}
+        \begin{center}
+            \includegraphics[width=\linewidth]{images/height_success}\\
+            \vspace{3mm}
+            \includegraphics[width=\linewidth]{images/height_failure}
+        \end{center}
+    \end{frame}
+
+
+    \begin{frame}
+        \frametitle{Color Contrast}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Vertical Alignment}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Depth Difference}
+    \end{frame}
+    
+
+    \begin{frame}
+        \frametitle{Pairwise Normal Orientation}
+        \includegraphics[width=\linewidth]{images/normal_feature}
+    \end{frame}
+
+
+    \begin{frame}
+        \frametitle{Summary of Pairwise Potentials}
+            \noindent\emph{$\bullet$~Constant.}
+                A constant feature allows to model general neighborhood relations.
+
+
+            \noindent\emph{$\bullet$~Color Contrast.}
+                We employ a non-linear color contrast, as is common in the computer
+                vision literature, between the superpixel mean colors $c_i$ and $c_j$:
+                $\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right)$.
+
+
+            \noindent\emph{$\bullet$~Vertical Alignment.}
+                We model the directed angle between superpixel centers in the 2D image
+                plane.  This allows the  model to learn that ``structure'' is above
+                ``floor'', but not the other way around.
+
+
+            \noindent\emph{$\bullet$~Depth Difference.}
+                We include the signed depth difference between superpixels, which
+                allows the model to detect depth discontinuities that are not
+                represented in the 2D neighborhood graph of the superpixels.
+
+
+            \noindent\emph{$\bullet$~Normal Orientations.}
+                Differences in normal vector orientation are a strong clue on
+                whether two superpixels belong to the same surface, and therefore the
+                same structural class.
+                We compute the 3D orientation of normals using the method of \citet{holz_2011_robocup},
+                as implemented in the point cloud library (pcl)\footnote{\url{http://pointclouds.org}}.
+                All normals within a superpixel are then averaged, to get a single orientation for each superpixel.
+                The feature is computed as the difference of $\frac{\pi}{4}$ and the (undirected) angle between the normals belonging
+                to two adjacent superpixels.  
+                An example is shown in \Figref{normal_feature}. The change
+                in normal orientation highlights that pillow and wall are distinct
+                objects, even though there is no strong distinction in color or depth.
+    \end{frame}
+
+    %\begin{frame}
+        %\frametitle{Solving the Structured SVM problem}
+        %\emph{Inference} is critical for learning:
+
+        %\begin{align*}
+            %&\argmax_{y \in Y} \left < w, \psi(x_i, y) \right > &\text{(prediction)}\\
+            %&\argmax_{y \in Y} \left < w, \psi(x_i, y) \right > + \Delta(x_i, y_i, y) &\text{(loss-augmented prediction)}
+        %\end{align*}
+        %\begin{visibleenv}<2->
+             %Typically $Y$ is (exponentially) large, making enumeration impossible.
+         %\end{visibleenv}
+
+        %\begin{visibleenv}<3->
+             %We need to exploit the \emph{structure} of the problem, encoded in $\psi$.
+         %\end{visibleenv}
+    %\end{frame}
+
+    %\begin{frame}
+        %\frametitle{Pairwise models as Structured SVMs}
+        %\begin{columns}
+            %\column{.6\linewidth}
+            %\begin{itemize}
+                %\item<1-> Typically $\psi$ decomposes over pairs of entries $(y_i, y_j)$:
+                    %\[w^T \psi(x, y) = \sum_{(i, j) \in E} w_{i,j} \psi_{i,j}(x, y_i, y_j) + \sum_i w_i \psi_i(x, y_i)\]
+                %\item<2-> If $E$ is a tree, exact inference by message-passing is possible.
+                %\item<3-> If $E$ does contain circles, we can still do approximate
+                    %inference using
+                    %\begin{itemize}
+                        %\item message passing
+                        %\item graph cuts
+                        %\item linear programming 
+                        %\item dual decomposition
+                    %\end{itemize}
+            %\end{itemize}
+            %\column{.3\linewidth}
+            %\vspace{40mm}
+            %\includegraphics[width=\linewidth]{images/scene_sp_graph}
+        %\end{columns}
+    %\end{frame}
+
+    %\begin{frame}
+        %\frametitle{Solving the Structured SVM problem}
+        %Once we know how to do inference, there are several approaches to finding $w$:
+        %\begin{itemize}
+            %\item Dualizing the problem, leading to a quadratic program \citep{taskar2003max, tsochantaridis2006large, joachims2009cutting}
+            %\item Stochastic Subgradient Descent \citep{ratliff2007online, lucchi2013learning}.
+            %\item Online coordinate descent in the dual \citep{lacoste2012block, shalev2012proximal, branson2013efficient}.
+            %\item Combining inference and learning \citep{meshi2010learning, hazan2010primal, stoyanov2011empirical, jancsarylearning}.
+        %\end{itemize}
+    %\end{frame}
+
+    \begin{frame}
+        \frametitle{How intractable are loopy models?}
+        \begin{itemize}
+            \item In general, inference in loopy models is NP-hard.
+            \item Learning relies on inference.
+            \item Combining several inference algorithms, we can get exact results in practice. %FIXME reference
+        \end{itemize}
+    \end{frame}
+
+
+    %\begin{frame}
+        %\frametitle{Conditional Random Fields and Structured SVMs}
+        %\begin{itemize}
+            %\item Conditional Random Fields: model $p(y | x)$, predict most likely $y$.
+            %\item Structured SVM: model $f(x, y)$, predict $\argmax_y f(x, y)$.
+            %\item Optimizing $p(y| x)$ is intractable, optimizing $L(\argmax_y f(x, y), y)$
+                %slightly less so.
+            %\item Computer vision researchers still call all graph based structured models CRFs.
+        %\end{itemize}
+    %\end{frame}
+
+
+    %\begin{frame}
+        %\frametitle{Applying Structured SVMs to Image Segmentation}
+        %\begin{itemize}
+            %\item<1-> Data-dependend terms $\psi_i(x, y_i) = x_i \otimes e_{y_i}$.
+            %\item<2-> Often $\psi_{i, j}(x, y^i, y^j) = e_{y_i} \otimes e_{y_j}$.
+            %\item<3-> \emph{Strength} of interaction sometimes conditioned on image:
+                %\[\psi_{i, j}(x, y^i, y^j) =  \alpha(||x_i - x_j||) \cdot e_{y_i} \otimes e_{y_j}.\]
+        %\end{itemize}
+    %\end{frame}
+
+    \section{Experiments}
+    
+    \begin{frame}
+        \frametitle{Dataset}
+    \end{frame}
+    
+
+    \begin{frame}
+        \frametitle{Experimental Protocol}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Results}
+        \begin{table*}[t]
+            \caption{Quantitative comparison of the proposed method with the
+            literature.\tablabel{results}}
+        \begin{tabularx}{\linewidth}{@{\extracolsep{\fill}}lcccccc}
+        \toprule
+                                & ground        &  structure    & furniture     & props         & class average   & pixel average\\
+        \cmidrule(r){1-7}
+
+        RF                              &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
+        RF + SP                         &         92.5  &   83.3        & \textbf{73.8} & 13.9          &  65.7        &  70.1 \\ 
+        RF + SP + SVM                   &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
+        RF + SP + CRF                   & \textbf{94.9} &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
+        \cmidrule(r){1-7}
+        \citet{SilbermanECCV12}         &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
+        \citet{couprie-iclr-13}         &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
+        \cmidrule(r){1-7}
+        \citet{stueckler2013}$^\dagger$ & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
+
+        \bottomrule
+        \end{tabularx}
+        \quad\\The best value in each column is printed in bold$^\dagger$. The upper part of
+        the table shows contributions by different parts of our pipeline. RF stands for random forest prediction, RF + SP for aggregated
+        random forests prediction within superpixels, RF + SP + SVM for an SVM trained on the unary potentials, and RF + SP + CRF is
+        our proposed pipeline. We optimized our approach for class average
+        accuracy.\\
+        $^\dagger$ \footnotesize Note that the work of \citet{stueckler2013} is not directly
+        comparable, as they integrated information over multiple frames, and did not
+        measure accuracy for pixels without valid depth measurement.
+        \vspace{-5mm}
+        \end{table*}
+    \end{frame}
+
+    \begin{frame}
+        % qualitative results
+    \end{frame}
+
+
+    \section*{Structured Machine Learning in Python}
+    \begin{frame}
+        \frametitle{PyStruct - simple structured prediction}
+        \begin{columns}
+            \column{.6\textwidth}
+                \begin{itemize}
+                    \item Implements common solvers: perceptron, cutting plane
+                        ssvm, latent ssvm, subgradient, block-coordinate
+                        Frank-Wolfe.
+                    \item<2-> Implements powerful models for many use cases.
+                    \item<3-> Interface to popular inference libraries: LibDAI, OpenGM, QPBO, AD3.
+                    \item<4-> Lots of documentation and examples.
+                \end{itemize}
+            \column{.4\textwidth}
+            \begin{center}
+                \includegraphics[width=.6\linewidth]{images/logo_pystruct}
+            \end{center}
+        \end{columns}
+    \end{frame}
+
+    \begin{frame}
+        \begin{center}
+            \includegraphics[width=\linewidth]{images/example_gallery}\\
+            http://pystruct.github.io
+        \end{center}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Take Home}
+        \begin{itemize}
+            \item High level semantic unaries.
+            \item Learn everything.
+            \item Exact learning of CRF possible.
+            \item Straight forward extension to 3D features.
+        \end{itemize}
+    \end{frame}
+    
+    \section*{Thank you.}
+    \begin{frame}
+        \begin{center}
+            Thank you for your attention.
+
+            Questions?
+        \end{center}
+    \end{frame}
+    \begin{frame}<beamer:0>
+        \bibliographystyle{plainnat}
+        \bibliography{paper}
+    \end{frame}
+
+	\end{document}
