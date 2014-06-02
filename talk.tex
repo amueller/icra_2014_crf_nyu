@@ -93,14 +93,14 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 		\frametitle{Semantic Segmentation of Structure Classes}
         %FIXME
             \begin{figure}
-                \begin{visibleenv}<1-2>
-                \includegraphics[width=.4 \textwidth]{images/00062_image}
-                \end{visibleenv}
-                \begin{visibleenv}<3>
-                \includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
-                \end{visibleenv}
+                \begin{onlyenv}<1-2>
+                \includegraphics[width=.4 \textwidth]{images/01124_image}
+                \end{onlyenv}
+                %\begin{onlyenv}<3>
+                %\includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
+                %\end{onlyenv}
                 \begin{visibleenv}<2->
-                    \includegraphics[width=.4 \textwidth]{images/00062_gt}
+                    \includegraphics[width=.4 \textwidth]{images/01124_gt}
                 \end{visibleenv}
             \end{figure}
 
@@ -108,20 +108,14 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
     \section{Structured prediction formulation}
 
-    \begin{frame}
-        \frametitle{Semantic Segmentation as Structured Prediction}
+    %\begin{frame}
+        %\frametitle{Semantic Segmentation as Structured Prediction}
         %FIXME
         %\begin{figure}
             %\includegraphics<1-2>[width=.6\linewidth]{images/scene_sp_gt}
             %\includegraphics<3->[width=.6\linewidth]{images/scene_sp_graph}
         %\end{figure}
-        \vspace{-5mm}
-        \begin{itemize}
-            \item<1->Predict class for each superpixel.
-            \item<2->Predictions clearly not independent.
-            \item<3->Use neighborhood structure to model correlations.
-        \end{itemize}
-    \end{frame}
+    %\end{frame}
 
     \begin{frame}
         \frametitle{Structured Prediction}
@@ -131,30 +125,40 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
             Pairwise model:
             \[w^T \psi(x, y) = \sum_{(i, j) \in E} w_{i,j} \psi_{i,j}(x, y_i, y_j) + \sum_i w_i \psi_i(x, y_i)\]
         \end{visibleenv}
+        \begin{visibleenv}<3->
         Objective
+        \end{visibleenv}
+        \begin{visibleenv}<4->
+            \begin{align*}
+                \psi_i(x, y_i) &= f(x_i) \otimes 1_{y_i}\\
+                \psi_i(x, y_i, y_j) &= f(x_i, x_j) \otimes 1_{y_i} \otimes 1_{y_j}
+            \end{align*}
+        \end{visibleenv}
         % FIXME
+
     \end{frame}
 
-    \section{Model and Features}
-    \begin{frame}
-        \frametitle{Superpixels}
-        % image + formular!
-    \end{frame}
-
+    \section{Unary and Pairwise Features}
     \begin{frame}
         \frametitle{Random Forest Unary Potentials}
-        %TODO reference
+        \begin{center}
+            \includegraphics[width=.6\linewidth]{images/joerg_rf_features}
+        \end{center}
+        GPU implementation from \citet{stueckler2013}.\\
+        Three trees, max-depth 18.
     \end{frame}
 
     \begin{frame}
         \frametitle{Absolute height potentials}
+            \[
+                f_{\text{height}}(x_i) = \textbf{n}_{\text{up}}^T \textbf{n}_{x_i}
+            \]
+        \begin{visibleenv}<2->
         \begin{center}
             \includegraphics[width=.6\linewidth]{images/height_success}\\
             \vspace{3mm}
             \includegraphics[width=.6\linewidth]{images/height_failure}
         \end{center}
-        \begin{visibleenv}<2->
-            Formular %TODO
         \end{visibleenv}
 
     \end{frame}
@@ -162,87 +166,67 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
     \begin{frame}
         \frametitle{Color Contrast}
-        \begin{center}
-            \includegraphics[width=.8\linewidth]{images/00062_pipline_feature_pairwise_1}
-        \end{center}
+        \[
+        f_\text{color}(x_i, x_j) = \exp\left(-\gamma \lVert c_i - c_j \rVert^2\right).
+         \]
         \begin{visibleenv}<2->
-            Formular %TODO
+            \begin{center}
+                \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_1}
+            \end{center}
         \end{visibleenv}
 
     \end{frame}
 
     \begin{frame}
-        \frametitle{Vertical Alignment}
-        \begin{center}
-            \includegraphics[width=.8\linewidth]{images/00062_pipline_feature_pairwise_4}
-        \end{center}
+        \frametitle{Edge direction}
+        \[
+            f_\text{direction}(x_i, x_j) = \sphericalangle(\text{pos}_{x_i} - \text{pos}_{x_j}, [0, 1]^T)
+         \]
         \begin{visibleenv}<2->
-            Formular %TODO
+        \begin{center}
+            \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_4}
+        \end{center}
         \end{visibleenv}
     \end{frame}
 
     \begin{frame}
         \frametitle{Depth Difference}
-        \begin{center}
-            \includegraphics[width=.8\linewidth]{images/00062_pipline_feature_pairwise_2}
-        \end{center}
+        \[
+            f_\text{depth}(x_i, x_j) = d_i - d_j / Z
+         \]
         \begin{visibleenv}<2->
-            Formular %TODO
+        \begin{center}
+            \includegraphics[width=.4\linewidth]{images/00062_pipline_feature_pairwise_2}
+        \end{center}
         \end{visibleenv}
     \end{frame}
     
 
     \begin{frame}
         \frametitle{Pairwise Normal Orientation}
-        \begin{center}
-            \includegraphics[width=\linewidth]{images/normal_feature}
-        \end{center}
+        \[
+            f_\text{normals}(x_i, x_j) = \frac{1}{\pi}\sphericalangle(\mathbf{n}_{x_i}, \mathbf{n}_{x_j})
+         \]
         \begin{visibleenv}<2->
-            Formular %TODO
+        \begin{center}
+            \includegraphics[width=.6\linewidth]{images/normal_feature}
+        \end{center}
         \end{visibleenv}
     \end{frame}
 
 
     \begin{frame}
-        \frametitle{Summary of Pairwise Potentials}
-            \noindent\emph{$\bullet$~Constant.}
-                A constant feature allows to model general neighborhood relations.
-
-
-            \noindent\emph{$\bullet$~Color Contrast.}
-                We employ a non-linear color contrast, as is common in the computer
-                vision literature, between the superpixel mean colors $c_i$ and $c_j$:
-                $\exp\left(-\gamma \lVert c_i - c_j \rVert^2\right)$.
-
-
-            \noindent\emph{$\bullet$~Vertical Alignment.}
-                We model the directed angle between superpixel centers in the 2D image
-                plane.  This allows the  model to learn that ``structure'' is above
-                ``floor'', but not the other way around.
-
-
-            \noindent\emph{$\bullet$~Depth Difference.}
-                We include the signed depth difference between superpixels, which
-                allows the model to detect depth discontinuities that are not
-                represented in the 2D neighborhood graph of the superpixels.
-
-
-            \noindent\emph{$\bullet$~Normal Orientations.}
-                Differences in normal vector orientation are a strong clue on
-                whether two superpixels belong to the same surface, and therefore the
-                same structural class.
-                We compute the 3D orientation of normals using the method of \citet{holz_2011_robocup},
-                as implemented in the point cloud library (pcl)\footnote{\url{http://pointclouds.org}}.
-                All normals within a superpixel are then averaged, to get a single orientation for each superpixel.
-                The feature is computed as the difference of $\frac{\pi}{4}$ and the (undirected) angle between the normals belonging
-                to two adjacent superpixels.  
-                The change
-                in normal orientation highlights that pillow and wall are distinct
-                objects, even though there is no strong distinction in color or depth.
+        \frametitle{Summary of Potentials}
+        \begin{align*}
+            f(x_i) &= f_\text{RandomForest}(x_i) \oplus f_\text{height}(x_i) \oplus 1\\
+            f(x_i, x_j) &= f_\text{color}(x_i, x_j) \oplus f_\text{direction}(x_i, x_j) \oplus f_\text{depth}(x_i, x_j) \oplus f_\text{normals}(x_i, x_j) \oplus 1
+        \end{align*}
+        
     \end{frame}
 
     \begin{frame}
         \frametitle{How intractable are loopy models?}
+        %FIXME
         \begin{itemize}
             \item In general, inference in loopy models is NP-hard.
             \item Learning relies on inference.
@@ -273,39 +257,28 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
     \begin{frame}
         \frametitle{Results}
         \begin{table}[t]
-            \caption{Quantitative comparison of the proposed method with the
-            literature.}
         \begin{tabularx}{\linewidth}{@{\extracolsep{\fill}}lcccccc}
         \toprule
-                                & ground        &  structure    & furniture     & props         & class average   & pixel average\\
+                                & \footnotesize ground        & \footnotesize  structure    & \footnotesize furniture     & \footnotesize props         & \footnotesize class avg   & \footnotesize pixel avg\\
         \cmidrule(r){1-7}
 
-        RF                              &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
-        RF + SP                         &         92.5  &   83.3        & \textbf{73.8} & 13.9          &  65.7        &  70.1 \\ 
-        RF + SP + SVM                   &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
-        RF + SP + CRF                   & \textbf{94.9} &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
+        \footnotesize RF                              &         90.8  &   81.6        & 67.9          & 19.9          &  65.0        &  68.3 \\
+        \footnotesize RF + SP                         &         92.5  &   83.3        & \textbf{73.8} & 13.9          &  65.7        &  70.1 \\ 
+        \footnotesize RF + SP + SVM                   &         94.4  &   79.1        & 64.2          & \textbf{44.0} &  70.4        &  70.3 \\
+        \footnotesize RF + SP + CRF                   & \textbf{94.9} &   78.9        &          71.1 & 42.7          &\textbf{71.9} &  \textbf{72.3} \\
         \cmidrule(r){1-7}
-        \citet{SilbermanECCV12}         &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
-        \citet{couprie-iclr-13}         &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
+        \footnotesize \citet{SilbermanECCV12}         &         68    &   59          & 70           & 42            &  59.6        & 58.6 \\
+        \footnotesize \citet{couprie-iclr-13}         &         87.3  & \textbf{86.1} & 45.3         & 35.5          &  63.5        & 64.5 \\
         \cmidrule(r){1-7}
-        \citet{stueckler2013}$^\dagger$ & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
+        \footnotesize \citet{stueckler2013}$^\dagger$ & \textbf{95.6} &   83.0        & \textbf{75.1}& 14.2          &  67.0        & 70.9 \\
 
         \bottomrule
         \end{tabularx}
-        \quad\\The best value in each column is printed in bold$^\dagger$. The upper part of
-        the table shows contributions by different parts of our pipeline. RF stands for random forest prediction, RF + SP for aggregated
-        random forests prediction within superpixels, RF + SP + SVM for an SVM trained on the unary potentials, and RF + SP + CRF is
-        our proposed pipeline. We optimized our approach for class average
-        accuracy.\\
-        $^\dagger$ \footnotesize Note that the work of \citet{stueckler2013} is not directly
-        comparable, as they integrated information over multiple frames, and did not
-        measure accuracy for pixels without valid depth measurement.
-        \vspace{-5mm}
         \end{table}
     \end{frame}
 
     \begin{frame}
-        \frametitle{blub}
+        \frametitle{Qualitative Results}
     %{\setlength{\tabcolsep}{1mm} 
     %\begin{tabu} to \linewidth{@{}XXXXX@{}}
         \begin{tabularx}{\linewidth}{@{\extracolsep{\fill}}cccccc}
@@ -340,68 +313,38 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
     %\includegraphics[width=.15\linewidth]{images/00118_gt.png}
 
     \end{tabularx}
-    %\multicolumn{5}{@{}c@{}}{Input Image}\vspace{3mm}\\
-
-    %\multicolumn{5}{@{}c@{}}{Random Forest Prediction}\vspace{3mm}\\
-
-    %\multicolumn{5}{@{}c@{}}{Superpixel Voting}\vspace{3mm}\\
-
-    %\multicolumn{5}{@{}c@{}}{Support Vector Machine on Superpixels}\vspace{3mm}\\
-
-    %\multicolumn{5}{@{}c@{}}{Conditional Random Field on Superpixels}\vspace{3mm}\\
-
-    %\multicolumn{5}{@{}c@{}}{Ground Truth}\vspace{3mm}\\
-    %\multicolumn{5}{@{}c@{}}{%
-        %\includegraphics[]{legend.pdf}
-    %}
-    %\end{tabu}
-%}
-        % qualitative results
+        \includegraphics[width=\linewidth]{legend.pdf}
     \end{frame}
 
 
     \begin{frame}
-        % Learned potentials
+    \begin{center}
+    \includegraphics[width=.45\linewidth]{images/vertical_alignment_png}
+    \includegraphics[width=.45\linewidth]{images/depth_difference_png}
+    \end{center}
     \end{frame}
 
 
     \section*{Structured Machine Learning in Python}
     \begin{frame}
         \frametitle{PyStruct - simple structured prediction}
-        \begin{columns}
-            \column{.6\textwidth}
-                \begin{itemize}
-                    \item Implements common solvers: perceptron, cutting plane
-                        ssvm, latent ssvm, subgradient, block-coordinate
-                        Frank-Wolfe.
-                    \item<2-> Implements powerful models for many use cases.
-                    \item<3-> Interface to popular inference libraries: LibDAI, OpenGM, QPBO, AD3.
-                    \item<4-> Lots of documentation and examples.
-                \end{itemize}
-            \column{.4\textwidth}
-            \begin{center}
-                \includegraphics[width=.6\linewidth]{images/logo_pystruct}
-            \end{center}
-        \end{columns}
-    \end{frame}
-
-    \begin{frame}
         \begin{center}
             \includegraphics[width=\linewidth]{images/example_gallery}\\
-            http://pystruct.github.io
+            \url{http://pystruct.github.io}
         \end{center}
     \end{frame}
 
+    \section*{Summary}
     \begin{frame}
         \frametitle{Take Home}
         \begin{itemize}
             \item High level semantic unaries.
             \item Learn everything.
             \item Exact learning of CRF possible.
+            \item Code available: \url{http://github.com/amueller/segmentation}
         \end{itemize}
     \end{frame}
     
-    \section*{Thank you.}
     \begin{frame}
         \begin{center}
             Thank you for your attention.
