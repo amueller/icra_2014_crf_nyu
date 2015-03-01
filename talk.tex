@@ -73,9 +73,8 @@
 	\title{
 Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of RGB-D Images
     } 
-    \author[short]{Andreas M\"uller}%
+    \author[short]{Andreas M\"uller\thanks{now at Amazon.com}, Sven Behnke}%
 	\institute[UBO]{%
-    Advisor: Sven Behnke\\
     Institute for Autonomous Intelligent Systems\\
 	Rheinische Friedrich-Wilhelms-Universit\"at\\[4mm]
 	\includegraphics[width=.2\linewidth]{images/Logo_UBo_h24_4c-crop}\\[3mm]
@@ -96,9 +95,9 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
                 \begin{onlyenv}<1-2>
                 \includegraphics[width=.4 \textwidth]{images/00062_image}
                 \end{onlyenv}
-                \begin{onlyenv}<3>
-                \includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
-                \end{onlyenv}
+                %\begin{onlyenv}<3>
+                %\includegraphics[width=.4 \textwidth]{images/00062_pipeline_sp}
+                %\end{onlyenv}
                 \begin{visibleenv}<2->
                     \includegraphics[width=.4 \textwidth]{images/00062_gt}
                 \end{visibleenv}
@@ -130,34 +129,41 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
         795 training images, 654 test images.
     \end{frame}
     
+    \begin{frame}
+        \frametitle{Overview}
+        \begin{center}
+            \includegraphics[width=.9\linewidth]{images/teaser}
+        \end{center}
+    \end{frame}
+
 
     \section{Structured prediction formulation}
 
     \begin{frame}
         \frametitle{Semantic Segmentation as Structured Prediction}
         \begin{figure}
-            \includegraphics<1>[width=.6\linewidth]{images/00062_pipeline_sp_cheated}
-            \includegraphics<2>[width=.6\linewidth]{images/00062_pipeline_sp_graph_cheated}
+            \includegraphics<1>[width=.6\linewidth]{images/00062_image}
+            \includegraphics<2>[width=.6\linewidth]{images/00062_pipeline_sp_cheated}
+            \includegraphics<3>[width=.6\linewidth]{images/00062_pipeline_sp_graph_cheated}
         \end{figure}
     \end{frame}
 
     \begin{frame}
         \frametitle{Structured Prediction}
         Learn prediction function of the form
-        \[f(x, w) := \argmax_{y \in \mathcal{Y}}  w^T \psi(x, y) \]
+        \[g(x, w) := \argmax_{y \in \mathcal{Y}}  w^T \psi(x, y) \]
         \begin{visibleenv}<1->
             Objective
-            \begin{align}
+            \begin{align*}
                 &\min_w \frac{1}{2} ||w||^2 + C \sum_i  \ell(x\hoch{i}, y\hoch{i}, w)\\
-                &\ell(x\hoch{i}, y\hoch{i}, w) = [\max_{y \in \mathcal{Y}} \Delta(y\hoch{i}, y) + w^T \Phi(x\hoch{i}, y) - w^T \psi(x\hoch{i}, y\hoch{i})]_+.
-            \end{align}
+                &\ell(x\hoch{i}, y\hoch{i}, w) = [\max_{y \in \mathcal{Y}} \Delta(y\hoch{i}, y) + w^T \psi(x\hoch{i}, y) - w^T \psi(x\hoch{i}, y\hoch{i})]_+.
+            \end{align*}
         \end{visibleenv}
 
     \end{frame}
 
     \begin{frame}
         \frametitle{Pairwise models}
-            Pairwise model:
             \[w^T \psi(x, y) = \sum_{(i, j) \in E} w_{i,j} \psi_{i,j}(x, y_i, y_j) + \sum_i w_i \psi_i(x, y_i)\]
         \begin{visibleenv}<2->
             \begin{align*}
@@ -174,7 +180,7 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
             \includegraphics[width=.6\linewidth]{images/joerg_rf_features}
         \end{center}
         GPU implementation from \citet{stueckler2013}.\\
-        Three trees, max-depth 18.
+        Number of trees: 3, max-depth: 18
     \end{frame}
 
     \begin{frame}
@@ -182,13 +188,13 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
             \[
                 f_{\text{height}}(x_i) = \textbf{n}_{\text{flat}}^T \textbf{n}_{x_i}
             \]
-        %\begin{visibleenv}<2->
         \begin{center}
             \includegraphics[width=.6\linewidth]{images/height_success}\\
             \vspace{3mm}
+            \begin{visibleenv}<2->
             \includegraphics[width=.6\linewidth]{images/height_failure}
+            \end{visibleenv}
         \end{center}
-        %\end{visibleenv}
 
     \end{frame}
 
@@ -245,7 +251,7 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
 
     \begin{frame}
-        \frametitle{Summary of Potentials}
+        \frametitle{Summary of Feature Functions}
         \begin{align*}
             f(x_i) &= f_\text{RandomForest}(x_i) \oplus f_\text{height}(x_i) \oplus 1\\
             f(x_i, x_j) &= f_\text{color}(x_i, x_j) \oplus f_\text{direction}(x_i, x_j) \oplus f_\text{depth}(x_i, x_j) \oplus f_\text{normals}(x_i, x_j) \oplus 1
@@ -254,11 +260,20 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
     \end{frame}
 
     \begin{frame}
-        \frametitle{Summary}
-        \begin{center}
-            \includegraphics[width=.9\linewidth]{images/teaser}
-        \end{center}
+        \frametitle{Learning and Optimization}
+        \begin{itemize}
+            \item $1$-slack SSVM
+            \item<2-> Inference using fusion moves and AD$^3$.
+            \item<3-> Exact learning in loopy model~\citep{mueller2014_exact}.
+        \end{itemize}
+        \begin{visibleenv}<4->
+            \begin{center}
+                \includegraphics[width=.5\linewidth]{images/example_gallery}\\
+                \url{http://pystruct.github.io}
+            \end{center}
+        \end{visibleenv}
     \end{frame}
+
 
     \section{Experiments}
     
@@ -283,9 +298,6 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
         \bottomrule
         \end{tabularx}
         \end{table}
-        \begin{visibleenv}<1->
-        Can learn loopy model exactly~\citep{mueller2014_exact}.
-        \end{visibleenv}
     \end{frame}
 
     \begin{frame}
@@ -330,27 +342,19 @@ Learning Depth-Sensitive Conditional Random Fields for Semantic Segmentation of 
 
     \begin{frame}
     \begin{center}
-    \includegraphics[width=.45\linewidth]{images/vertical_alignment_png}
-    \includegraphics[width=.45\linewidth]{images/depth_difference_png}
+        \frametitle{Learned Potentials}
+        \includegraphics[width=.45\linewidth]{images/vertical_alignment_png}
+        \includegraphics[width=.45\linewidth]{images/depth_difference_png}
     \end{center}
     \end{frame}
 
-
-    \section*{Structured Machine Learning in Python}
-    \begin{frame}
-        \frametitle{PyStruct - simple structured prediction}
-        \begin{center}
-            \includegraphics[width=\linewidth]{images/example_gallery}\\
-            \url{http://pystruct.github.io}
-        \end{center}
-    \end{frame}
 
     \section*{Summary}
     \begin{frame}
         \frametitle{Take Home}
         \begin{itemize}
-            \item High level semantic unaries.
-            \item Learn everything.
+            \item Can incorporate geometric relations into CRF.
+            \item Learn all potentials.
             \item Exact learning of CRF possible.
             \item Code available: \url{http://github.com/amueller/segmentation}
         \end{itemize}
